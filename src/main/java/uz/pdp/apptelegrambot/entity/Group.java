@@ -1,13 +1,11 @@
 package uz.pdp.apptelegrambot.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
 import lombok.*;
-import uz.pdp.apptelegrammanagergroupbot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
 
 import java.io.Serializable;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,11 +14,19 @@ import java.util.List;
 @ToString
 @Entity(name = "groups")
 public class Group extends AbsLongEntity implements Serializable {
-    private Long ownerId;
+    private String name;
+
+    private Long adminId;
 
     private Long groupId;
 
+    private String botToken;
+
     private String cardNumber;
+
+    private String cardFirstName;
+
+    private LocalDateTime expireAt;
 
     private boolean payment;
 
@@ -28,9 +34,4 @@ public class Group extends AbsLongEntity implements Serializable {
 
     private boolean screenShot;
 
-    @OneToMany(mappedBy = "group",fetch = FetchType.EAGER)
-    @ToString.Exclude
-    private List<Tariff> tariffs;
-
-    private String name;
 }

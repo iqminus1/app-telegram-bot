@@ -5,8 +5,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import uz.pdp.apptelegrammanagergroupbot.entity.ScreenshotGroup;
-import uz.pdp.apptelegrammanagergroupbot.enums.ScreenshotStatus;
+import uz.pdp.apptelegrambot.entity.ScreenshotGroup;
+import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,31 +24,6 @@ public interface ScreenshotGroupRepository extends JpaRepository<ScreenshotGroup
     @CachePut(value = "screenshotGroupEntity", key = "#screenshotGroup.id")
     default Optional<ScreenshotGroup> saveOptional(ScreenshotGroup screenshotGroup) {
         return Optional.of(save(screenshotGroup));
-    }
-
-    @Cacheable(value = "screenshotGroupEntityBySender", key = "#groupId" + "+" + "#userId")
-    Optional<ScreenshotGroup> findByGroupIdAndSendUserIdAndStatus(Long groupId, Long userId, ScreenshotStatus status);
-
-    default void deleteAndClearCache(ScreenshotGroup screenshotGroup) {
-        findAllCache(screenshotGroup.getGroupId());
-        clearCache(screenshotGroup.getGroupId(), screenshotGroup.getSendUserId());
-        clearById(screenshotGroup.getId());
-        delete(screenshotGroup);
-    }
-
-
-    @CacheEvict(value = "screenshotGroupEntity", key = "#id")
-    default void clearById(Long id) {
-
-    }
-
-    @CacheEvict(value = "screenshotGroupEntityBySender", key = "#groupId" + "+" + "#userId")
-    default void clearCache(Long groupId, Long userId) {
-
-    }
-
-    @CacheEvict(value = "findAll", key = "#screenshotGroup.groupId")
-    default void findAllCache(Long groupId) {
     }
 
 }

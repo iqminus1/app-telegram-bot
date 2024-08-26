@@ -1,11 +1,12 @@
 package uz.pdp.apptelegrambot.entity;
+
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
 import lombok.*;
-import uz.pdp.apptelegrammanagergroupbot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.enums.ExpireType;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,20 +14,13 @@ import java.io.Serializable;
 @Getter
 @ToString
 @Entity
-public class Tariff extends AbsLongEntity implements Serializable, Comparable<Tariff> {
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Group group;
+public class Tariff extends AbsLongEntity implements Serializable {
+    private LocalDateTime createAt;
 
-    private String name;
+    private Long groupId;
 
-    private Integer days;
+    private ExpireType type;
 
     private Long price;
 
-    private Integer orderBy;
-
-    @Override
-    public int compareTo(Tariff other) {
-        return this.orderBy.compareTo(other.orderBy);
-    }
 }

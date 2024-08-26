@@ -2,7 +2,8 @@ package uz.pdp.apptelegrambot.entity;
 
 import jakarta.persistence.Entity;
 import lombok.*;
-import uz.pdp.apptelegrammanagergroupbot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.enums.ExpireType;
 
 import java.io.Serializable;
 
@@ -21,5 +22,5 @@ public class Invoice extends AbsLongEntity implements Serializable {
 
     private Long amount;
 
-    private Integer expire;
+    private ExpireType type;
 }

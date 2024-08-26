@@ -1,8 +1,9 @@
 package uz.pdp.apptelegrambot.entity;
 
+
 import jakarta.persistence.Entity;
 import lombok.*;
-import uz.pdp.apptelegrammanagergroupbot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
 
 import java.io.Serializable;
 
@@ -12,7 +13,8 @@ import java.io.Serializable;
 @Getter
 @ToString
 @Entity
+public class GroupPermission extends AbsLongEntity implements Serializable {
+    private Long groupId;
 
-public class CreatorCode extends AbsLongEntity implements Serializable {
-    private String code;
+    private boolean payment;
 }

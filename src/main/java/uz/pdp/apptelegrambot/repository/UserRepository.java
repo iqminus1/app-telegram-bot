@@ -4,7 +4,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import uz.pdp.apptelegrammanagergroupbot.entity.User;
+import uz.pdp.apptelegrambot.entity.User;
 
 import java.util.Optional;
 

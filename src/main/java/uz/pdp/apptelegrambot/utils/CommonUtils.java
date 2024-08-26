@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import uz.pdp.apptelegrammanagergroupbot.entity.User;
-import uz.pdp.apptelegrammanagergroupbot.enums.StateEnum;
-import uz.pdp.apptelegrammanagergroupbot.repository.UserRepository;
+import uz.pdp.apptelegrambot.entity.User;
+import uz.pdp.apptelegrambot.enums.StateEnum;
+import uz.pdp.apptelegrambot.repository.UserRepository;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

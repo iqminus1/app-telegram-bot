@@ -59,7 +59,7 @@ public class MessageServiceImpl implements MessageService {
             return;
         }
         commonUtils.setLang(userId, lang);
-        sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_CHANGED_LANGUAGE, lang.toString()), responseButton.start(userId));
+        sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_CHANGED_LANGUAGE, lang.name()), responseButton.start(userId));
     }
 
     private void selectLanguage(long userId) {

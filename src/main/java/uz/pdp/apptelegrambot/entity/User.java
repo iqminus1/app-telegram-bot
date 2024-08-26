@@ -5,7 +5,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import lombok.*;
-import uz.pdp.apptelegrammanagergroupbot.enums.StateEnum;
+import uz.pdp.apptelegrambot.enums.StateEnum;
 
 import java.io.Serializable;
 
@@ -22,5 +22,6 @@ public class User implements Serializable {
     @Enumerated(EnumType.STRING)
     private StateEnum state;
 
+    private String contactNumber;
 
 }

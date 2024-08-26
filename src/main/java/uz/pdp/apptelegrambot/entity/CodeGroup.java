@@ -3,7 +3,8 @@ package uz.pdp.apptelegrambot.entity;
 import jakarta.persistence.Entity;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
-import uz.pdp.apptelegrammanagergroupbot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.enums.ExpireType;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -22,7 +23,7 @@ public class CodeGroup extends AbsLongEntity implements Serializable {
 
     private Long userId;
 
-    private Integer expireDay;
+    private ExpireType type;
 
     private boolean active;
 

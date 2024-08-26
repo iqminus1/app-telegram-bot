@@ -5,7 +5,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import uz.pdp.apptelegrammanagergroupbot.entity.JoinGroupRequest;
+import uz.pdp.apptelegrambot.entity.JoinGroupRequest;
 
 import java.util.Optional;
 

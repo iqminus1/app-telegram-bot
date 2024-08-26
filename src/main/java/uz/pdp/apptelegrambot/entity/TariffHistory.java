@@ -2,7 +2,7 @@ package uz.pdp.apptelegrambot.entity;
 
 import jakarta.persistence.Entity;
 import lombok.*;
-import uz.pdp.apptelegrammanagergroupbot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
 
 import java.io.Serializable;
 
@@ -12,6 +12,6 @@ import java.io.Serializable;
 @Getter
 @ToString
 @Entity
-public class Creator extends AbsLongEntity implements Serializable {
-    private Long userId;
+public class TariffHistory extends AbsLongEntity implements Serializable {
+
 }

@@ -1,0 +1,15 @@
+server:
+  port: 777
+spring:
+  datasource:
+    username: postgres
+    password: 123
+    url: jdbc:postgresql://localhost:5432/app_telegram_bot
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  cache:
+    redis:
+      time-to-live: 8h

@@ -4,11 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
-import uz.pdp.apptelegrammanagergroupbot.entity.temp.AbsLongEntity;
-import uz.pdp.apptelegrammanagergroupbot.enums.ScreenshotStatus;
+import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,7 +28,5 @@ public class ScreenshotGroup extends AbsLongEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     private ScreenshotStatus status;
 
-    private boolean active;
-
-    private Timestamp activeDate;
+    private LocalDateTime activeAt;
 }

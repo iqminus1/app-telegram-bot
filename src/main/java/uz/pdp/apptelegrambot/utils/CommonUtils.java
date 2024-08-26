@@ -28,7 +28,7 @@ public class CommonUtils {
             users.put(userId, optional.get());
             return optional.get();
         }
-        User user = userRepository.saveOptional(new User(userId, StateEnum.START)).get();
+        User user = userRepository.saveOptional(new User(userId, StateEnum.START, null)).get();
         users.put(userId, user);
         return user;
     }

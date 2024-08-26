@@ -12,8 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
-    @Cacheable(value = "groupEntityByOwnerId", key = "#ownerId")
-    List<Group> findAllByOwnerId(Long ownerId);
+    @Cacheable(value = "groupEntityByOwnerId", key = "#adminId")
+    List<Group> findAllByAdminId(Long adminId);
 
     @Cacheable(value = "groupEntityGroupId", key = "#groupId")
     Optional<Group> findByGroupId(Long groupId);

@@ -9,11 +9,11 @@ import uz.pdp.apptelegrambot.entity.GroupPermission;
 import java.util.Optional;
 
 @Repository
-public interface UserPermissionRepository extends JpaRepository<GroupPermission, Long> {
-    @Cacheable(value = "userPermission", key = "#groupId")
+public interface GroupPermissionRepository extends JpaRepository<GroupPermission, Long> {
+    @Cacheable(value = "groupPermission", key = "#groupId")
     Optional<GroupPermission> findByGroupId(Long groupId);
 
-    @CachePut(value = "userPermission", key = "#permission.groupId")
+    @CachePut(value = "groupPermission", key = "#permission.groupId")
     default Optional<GroupPermission> saveOptional(GroupPermission permission) {
         return Optional.of(save(permission));
     }

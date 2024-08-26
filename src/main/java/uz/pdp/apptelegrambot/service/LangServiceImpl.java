@@ -1,6 +1,7 @@
 package uz.pdp.apptelegrambot.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Service;
 import uz.pdp.apptelegrambot.enums.LangEnum;
@@ -14,9 +15,9 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class LangServiceImpl implements LangService {
     private final ResourceBundleMessageSource messageSource;
-    private final UserLangRepository userLangRepository;
     private final CommonUtils commonUtils;
 
+    @Cacheable(value = "languageMessage",key = "#commonUtils.getUserLang(#userId)")
     @Override
     public String getMessage(LangFields keyword, long userId) {
         try {
@@ -26,6 +27,7 @@ public class LangServiceImpl implements LangService {
         }
     }
 
+    @Cacheable(value = "languageMessage",key = "#lang")
     @Override
     public String getMessage(LangFields keyword, String lang) {
         try {

@@ -61,11 +61,11 @@ public class CommonUtils {
     public void setLang(long userId, LangEnum language) {
         if (userLang.containsKey(userId)) {
             UserLang lang = userLang.get(userId);
-            lang.setLang(language.toString());
+            lang.setLang(language.name());
             return;
         }
         UserLang user = userLangRepository.findById(userId).orElseGet(() ->
-                userLangRepository.saveOptional(new UserLang(userId, language.toString())).get()
+                userLangRepository.saveOptional(new UserLang(userId, language.name())).get()
         );
         userLang.put(userId, user);
     }

@@ -33,8 +33,8 @@ public class AdminController {
         adminSender.put(adminId, sender);
         AdminUtils adminUtils = new AdminUtils(userLangRepository);
         MyChatMemberService myChatMemberService = new MyChatMemberServiceImpl(groupRepository, sender);
-        AdminMessageServiceImpl adminMessageService = new AdminMessageServiceImpl();
         AdminResponseButton adminResponseButton = new AdminResponseButton(buttonService, groupRepository, langService);
+        AdminMessageServiceImpl adminMessageService = new AdminMessageServiceImpl(sender, langService, adminUtils, adminResponseButton, groupRepository, buttonService);
         ChatJoinRequestService chatJoinRequestService = new ChatJoinRequestServiceImpl(sender, orderRepository, langService, adminResponseButton, adminUtils);
         AdminProcessService adminProcessService = new AdminProcessServiceImpl(myChatMemberService, chatJoinRequestService, adminMessageService);
         new AdminBot(token, adminId, adminProcessService);

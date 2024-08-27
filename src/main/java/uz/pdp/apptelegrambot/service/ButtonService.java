@@ -1,6 +1,5 @@
 package uz.pdp.apptelegrambot.service;
 
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
@@ -16,5 +15,7 @@ public interface ButtonService {
     ReplyKeyboard withString(List<String> list, int rowSize);
 
     InlineKeyboardMarkup callbackKeyboard(List<Map<String, String>> textData);
+
+    ReplyKeyboard language(String lang);
 
 }

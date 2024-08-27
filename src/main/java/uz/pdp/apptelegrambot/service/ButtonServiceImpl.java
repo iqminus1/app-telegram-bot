@@ -1,5 +1,6 @@
 package uz.pdp.apptelegrambot.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -7,13 +8,16 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import uz.pdp.apptelegrambot.enums.LangFields;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ButtonServiceImpl implements ButtonService {
+    private final LangService langService;
 
     @Override
     public ReplyKeyboard withString(List<String> list, int rowSize) {
@@ -56,5 +60,17 @@ public class ButtonServiceImpl implements ButtonService {
         }
         markup.setKeyboard(rows);
         return markup;
+    }
+@Override
+    public ReplyKeyboard language(String lang) {
+        List<String> list = new ArrayList<>();
+
+        list.add(langService.getMessage(LangFields.BUTTON_LANGUAGE_UZBEK, lang));
+
+        list.add(langService.getMessage(LangFields.BUTTON_LANGUAGE_RUSSIAN, lang));
+
+        list.add(langService.getMessage(LangFields.BUTTON_LANGUAGE_ENGLISH, lang));
+
+        return withString(list);
     }
 }

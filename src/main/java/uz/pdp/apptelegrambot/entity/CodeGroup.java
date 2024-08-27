@@ -28,4 +28,8 @@ public class CodeGroup extends AbsLongEntity implements Serializable {
     private boolean active;
 
     private Timestamp activeAt;
+
+    private Long tariffId;
+
+    private Long tariffPrice;
 }

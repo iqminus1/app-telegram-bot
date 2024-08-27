@@ -21,13 +21,13 @@ public class ResponseButton {
     public ReplyKeyboard start(long userId) {
         List<String> list = new ArrayList<>();
 
-        list.add(langService.getMessage(LangFields.ADD_BOT, userId));
+        list.add(langService.getMessage(LangFields.BUTTON_ADD_BOT, userId));
 
-        list.add(langService.getMessage(LangFields.MY_BOTS, userId));
+        list.add(langService.getMessage(LangFields.BUTTON_MY_BOTS, userId));
 
-        list.add(langService.getMessage(LangFields.LANG_SETTINGS, userId));
+        list.add(langService.getMessage(LangFields.BUTTON_LANG_SETTINGS, userId));
 
-        list.add(langService.getMessage(LangFields.CONTACT_US, userId));
+        list.add(langService.getMessage(LangFields.BUTTON_CONTACT_US, userId));
 
         return buttonService.withString(list);
     }

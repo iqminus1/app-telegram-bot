@@ -6,7 +6,6 @@ import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
 import uz.pdp.apptelegrambot.enums.ExpireType;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,8 +14,6 @@ import java.time.LocalDateTime;
 @ToString
 @Entity
 public class Tariff extends AbsLongEntity implements Serializable {
-    private LocalDateTime createAt;
-
     private Long groupId;
 
     private ExpireType type;

@@ -23,4 +23,11 @@ public class AdminController {
         adminSender.put(adminId, sender);
         new AdminBot(token, adminId, adminProcessService);
     }
+
+    public AdminSender getSenderByAdminId(long adminId) {
+        if (adminSender.containsKey(adminId)) {
+            return adminSender.get(adminId);
+        }
+        return null;
+    }
 }

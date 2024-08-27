@@ -28,6 +28,8 @@ public class Group extends AbsLongEntity implements Serializable {
 
     private LocalDateTime expireAt;
 
+    private boolean allowPayment;
+
     private boolean payment;
 
     private boolean code;

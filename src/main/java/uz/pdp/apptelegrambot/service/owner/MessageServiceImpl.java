@@ -9,7 +9,7 @@ import uz.pdp.apptelegrambot.enums.LangFields;
 import uz.pdp.apptelegrambot.enums.StateEnum;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.owner.bot.OwnerSender;
-import uz.pdp.apptelegrambot.utils.CommonUtils;
+import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -28,14 +28,20 @@ public class MessageServiceImpl implements MessageService {
                 String text = message.getText();
                 if (text.equals("/start")) {
                     start(userId);
+                    return;
                 }
                 switch (user.getState()) {
                     case START -> {
-                        if (text.equals(langService.getMessage(LangFields.LANG_SETTINGS, userId))) {
+                        if (text.equals(langService.getMessage(LangFields.BUTTON_LANG_SETTINGS, userId))) {
                             selectLanguage(userId);
+                        } else if (text.equals(langService.getMessage(LangFields.BUTTON_CONTACT_US, userId))) {
+                            contactUs(userId);
                         }
                     }
-                    case SELECT_LANGUAGE -> changeLanguage(message, userId);
+                    case SELECT_LANGUAGE -> changeLanguage(text, userId);
+                    default ->
+                            sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, userId), responseButton.start(userId));
+
                 }
 
 
@@ -43,23 +49,31 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
-    private void changeLanguage(Message message, Long userId) {
-        String text = message.getText();
-        LangEnum lang = null;
-        if (text.equals(langService.getMessage(LangFields.BUTTON_LANGUAGE_UZBEK, "Uz"))) {
-            lang = LangEnum.UZ;
-        } else if (text.equals(langService.getMessage(LangFields.BUTTON_LANGUAGE_RUSSIAN, "Uz"))) {
-            lang = LangEnum.RU;
-        } else if (text.equals(langService.getMessage(LangFields.BUTTON_LANGUAGE_ENGLISH, "Uz"))) {
-            lang = LangEnum.ENG;
-        }
-        commonUtils.setState(userId, StateEnum.START);
+    private void contactUs(Long userId) {
+        String message = langService.getMessage(LangFields.CONTACT_US_TEXT, userId);
+        sender.sendMessage(userId, message);
+    }
+
+    private void changeLanguage(String text, Long userId) {
+        LangEnum lang = getLanguageEnum(text);
         if (lang == null) {
             sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_LANGUAGE, userId), responseButton.start(userId));
             return;
         }
         commonUtils.setLang(userId, lang);
+        commonUtils.setState(userId, StateEnum.START);
         sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_CHANGED_LANGUAGE, lang.name()), responseButton.start(userId));
+    }
+
+    private LangEnum getLanguageEnum(String text) {
+        if (text.equals(langService.getMessage(LangFields.BUTTON_LANGUAGE_UZBEK, "Uz"))) {
+            return LangEnum.UZ;
+        } else if (text.equals(langService.getMessage(LangFields.BUTTON_LANGUAGE_RUSSIAN, "Uz"))) {
+            return LangEnum.RU;
+        } else if (text.equals(langService.getMessage(LangFields.BUTTON_LANGUAGE_ENGLISH, "Uz"))) {
+            return LangEnum.ENG;
+        }
+        return null;
     }
 
     private void selectLanguage(long userId) {

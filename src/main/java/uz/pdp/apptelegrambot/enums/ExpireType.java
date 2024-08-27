@@ -1,7 +1,7 @@
 package uz.pdp.apptelegrambot.enums;
 
 public enum ExpireType {
-    WEAK,
+    WEEK,
     DAY_15,
     MONTH,
     YEAR,

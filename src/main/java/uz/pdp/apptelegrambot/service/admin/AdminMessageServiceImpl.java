@@ -35,13 +35,13 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                 }
                 switch (state) {
                     case START -> {
-                        if (text.equals(langService.getMessage(LangFields.BUTTON_LANG_SETTINGS, userId))) {
+                        if (text.equals(langService.getMessage(LangFields.BUTTON_LANG_SETTINGS, userLang))) {
                             selectLanguage(userId);
                         }
                     }
                     case SELECT_LANGUAGE -> changeLanguage(text, userId, userLang);
                     default ->
-                            sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, userId), responseButton.start(getGroupId(), userLang));
+                            sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, userLang), responseButton.start(getGroupId(), userLang));
 
                 }
             }
@@ -58,7 +58,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         }
         adminUtils.setUserLang(userId, lang.name());
         adminUtils.setUserState(userId, StateEnum.START);
-        sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_CHANGED_LANGUAGE, lang.name()), responseButton.start(groupId, userLang));
+        sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_CHANGED_LANGUAGE, lang.name()), responseButton.start(groupId, lang.name()));
     }
 
 
@@ -77,7 +77,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         sender.sendMessage(userId, message, start);
     }
 
-    private long getGroupId() {
+    private Long getGroupId() {
         String botUsername = sender.getBotUsername();
         return groupRepository.findByBotUsername(botUsername).orElseThrow().getGroupId();
     }

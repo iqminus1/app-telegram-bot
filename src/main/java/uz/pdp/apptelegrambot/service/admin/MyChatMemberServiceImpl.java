@@ -23,23 +23,22 @@ public class MyChatMemberServiceImpl implements MyChatMemberService {
         Long groupId = chatMember.getChat().getId();
         if (Objects.equals(chatMember.getNewChatMember().getUser().getUserName(), username)) {
             if (List.of(ChatMemberOwner.STATUS, ChatMemberAdministrator.STATUS).contains(chatMember.getNewChatMember().getStatus())) {
-                groupRepository.findByGroupId(groupId).ifPresent(g -> {
+                groupRepository.findByBotUsername(username).ifPresent(g -> {
                     if (g.getGroupId() == null) {
                         g.setGroupId(groupId);
+                        g.setName(chatMember.getChat().getTitle());
                         groupRepository.saveOptional(g);
                     } else {
                         sender.leaveChat(groupId);
                     }
                 });
-            } else if (Objects.equals(ChatMemberMember.STATUS, chatMember.getNewChatMember().getStatus())) {
+            } else if (List.of(ChatMemberMember.STATUS, ChatMemberLeft.STATUS).contains(chatMember.getNewChatMember().getStatus())) {
                 groupRepository.findByGroupId(groupId).ifPresent(g -> {
                     if (g.getGroupId().equals(groupId)) {
                         g.setGroupId(null);
                         groupRepository.saveOptional(g);
                     }
                 });
-            } else if (Objects.equals(ChatMemberLeft.STATUS, chatMember.getNewChatMember().getStatus())) {
-                groupRepository.findByGroupId(groupId).ifPresent(groupRepository::delete);
             }
         }
     }

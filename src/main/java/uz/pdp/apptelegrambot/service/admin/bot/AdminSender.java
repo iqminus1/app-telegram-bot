@@ -1,7 +1,7 @@
 package uz.pdp.apptelegrambot.service.admin.bot;
 
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.GetMe;
@@ -17,9 +17,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.pdp.apptelegrambot.entity.Order;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-@EnableAsync
 public class AdminSender extends DefaultAbsSender {
+    private String username = null;
 
     public AdminSender(String token) {
         super(new DefaultBotOptions(), token);
@@ -53,8 +54,11 @@ public class AdminSender extends DefaultAbsSender {
 
     public String getBotUsername() {
         try {
-            User bot = execute(new GetMe());
-            return bot.getUserName();
+            if (username == null) {
+                User bot = execute(new GetMe());
+                username = bot.getUserName();
+            }
+            return username;
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
@@ -104,5 +108,10 @@ public class AdminSender extends DefaultAbsSender {
 
     public void sendMessageAndRemove(Long userId, String text) {
         sendMessage(userId, text, new ReplyKeyboardRemove(true));
+    }
+
+    @Scheduled(fixedRate = 1, timeUnit = TimeUnit.HOURS)
+    public void process() {
+        username = null;
     }
 }

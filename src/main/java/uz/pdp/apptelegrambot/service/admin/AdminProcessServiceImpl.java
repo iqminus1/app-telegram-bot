@@ -1,12 +1,22 @@
 package uz.pdp.apptelegrambot.service.admin;
 
-import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-@Service
+@RequiredArgsConstructor
 public class AdminProcessServiceImpl implements AdminProcessService {
-    @Override
-    public void process(Update update,Long adminId) {
+    private final MyChatMemberService myChatMemberService;
+    private final ChatJoinRequestService chatJoinRequestService;
+    private final AdminMessageService adminMessageService;
 
+    @Override
+    public void process(Update update, Long adminId) {
+        if (update.hasMyChatMember()) {
+            myChatMemberService.process(update.getMyChatMember());
+        }else if(update.hasChatJoinRequest()){
+            chatJoinRequestService.process(update.getChatJoinRequest());
+        }else if (update.hasMessage()){
+            adminMessageService.process(update.getMessage());
+        }
     }
 }

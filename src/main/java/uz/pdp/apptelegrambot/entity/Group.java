@@ -22,6 +22,8 @@ public class Group extends AbsLongEntity implements Serializable {
 
     private String botToken;
 
+    private String botUsername;
+
     private String cardNumber;
 
     private String cardFirstName;

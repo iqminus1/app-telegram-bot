@@ -6,8 +6,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Service;
 import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
-import uz.pdp.apptelegrambot.repository.UserLangRepository;
-import uz.pdp.apptelegrambot.utils.CommonUtils;
+import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
 
 import java.util.Locale;
 

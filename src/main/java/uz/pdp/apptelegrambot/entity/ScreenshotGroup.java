@@ -21,12 +21,14 @@ public class ScreenshotGroup extends AbsLongEntity implements Serializable {
 
     private Long sendUserId;
 
-    private Long tariffId;
-
     private String path;
 
     @Enumerated(EnumType.STRING)
     private ScreenshotStatus status;
 
     private LocalDateTime activeAt;
+
+    private Long tariffId;
+
+    private Long tariffPrice;
 }

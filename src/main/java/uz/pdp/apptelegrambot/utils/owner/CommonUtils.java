@@ -1,4 +1,4 @@
-package uz.pdp.apptelegrambot.utils;
+package uz.pdp.apptelegrambot.utils.owner;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;

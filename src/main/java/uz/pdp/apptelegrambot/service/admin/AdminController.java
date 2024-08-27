@@ -2,7 +2,6 @@ package uz.pdp.apptelegrambot.service.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.repository.GroupRepository;
@@ -17,11 +16,9 @@ import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 @Component
 @RequiredArgsConstructor
-@EnableAsync
 public class AdminController {
     private final GroupRepository groupRepository;
     private final OrderRepository orderRepository;
@@ -31,7 +28,7 @@ public class AdminController {
     private final Temp temp;
     Map<Long, AdminSender> adminSender = new ConcurrentHashMap<>();
 
-    @Async
+
     public void addAdminBot(String token, Long adminId) {
         AdminSender sender = new AdminSender(token);
         adminSender.put(adminId, sender);
@@ -43,6 +40,10 @@ public class AdminController {
         ChatJoinRequestService chatJoinRequestService = new ChatJoinRequestServiceImpl(sender, orderRepository, langService, adminResponseButton, groupRepository, adminUtils);
         AdminProcessService adminProcessService = new AdminProcessServiceImpl(myChatMemberService, chatJoinRequestService, adminMessageService);
         new AdminBot(token, adminId, adminProcessService);
+    }
+    @Async
+    public void asyncAddAdminBot(String token,Long adminId){
+        addAdminBot(token,adminId);
     }
 
     private void setBotToken(AdminSender sender, Long adminId) {

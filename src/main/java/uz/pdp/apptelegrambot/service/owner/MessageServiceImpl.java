@@ -3,6 +3,7 @@ package uz.pdp.apptelegrambot.service.owner;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.User;
 import uz.pdp.apptelegrambot.enums.LangEnum;
@@ -96,7 +97,10 @@ public class MessageServiceImpl implements MessageService {
         group.setScreenShot(true);
         temp.addTempGroup(group);
         adminController.addAdminBot(text, userId);
-
+        commonUtils.setState(userId, StateEnum.SELECTING_TARIFF);
+        Group savedGroup = groupRepository.findByBotToken(text).orElseThrow();
+        InlineKeyboardMarkup markup = responseButton.tariffList(savedGroup.getId(), userId);
+        sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_TARIFF_TEXT, userId), markup);
     }
 
 

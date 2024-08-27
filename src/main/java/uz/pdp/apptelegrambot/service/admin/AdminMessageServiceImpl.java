@@ -12,9 +12,6 @@ import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
 import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 @RequiredArgsConstructor
 public class AdminMessageServiceImpl implements AdminMessageService {
     private final AdminSender sender;
@@ -80,7 +77,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         sender.sendMessage(userId, message, start);
     }
 
-    private long getGroupId() {
+    private Long getGroupId() {
         String botUsername = sender.getBotUsername();
         return groupRepository.findByBotUsername(botUsername).orElseThrow().getGroupId();
     }

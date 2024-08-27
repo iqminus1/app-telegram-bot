@@ -14,7 +14,7 @@ import java.io.Serializable;
 @ToString
 @Entity
 public class Tariff extends AbsLongEntity implements Serializable {
-    private Long groupId;
+    private Long botId;
 
     private ExpireType type;
 

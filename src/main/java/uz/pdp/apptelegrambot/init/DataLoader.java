@@ -27,7 +27,7 @@ public class DataLoader implements CommandLineRunner {
             throw new RuntimeException(e);
         }
         for (Group group : groupRepository.findAll()) {
-            adminController.addAdminBot(group.getBotToken(), group.getAdminId());
+            adminController.asyncAddAdminBot(group.getBotToken(), group.getAdminId());
         }
     }
 }

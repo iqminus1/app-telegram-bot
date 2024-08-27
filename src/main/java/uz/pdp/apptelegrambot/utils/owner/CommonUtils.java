@@ -2,8 +2,6 @@ package uz.pdp.apptelegrambot.utils.owner;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uz.pdp.apptelegrambot.entity.User;
@@ -17,8 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-@EnableScheduling
-@EnableAsync
 @RequiredArgsConstructor
 @Component
 public class CommonUtils {

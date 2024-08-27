@@ -18,13 +18,13 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     @Cacheable(value = "groupEntityGroupId", key = "#groupId")
     Optional<Group> findByGroupId(Long groupId);
 
-    @CacheEvict(value = "groupEntityByOwnerId", allEntries = true)
-    @CachePut(value = "groupEntityGroupId",key = "#group.groupId")
+    @CacheEvict(value = {"groupEntityByOwnerId", "adminResponseServiceStart"}, allEntries = true)
+    @CachePut(value = "groupEntityGroupId", key = "#group.groupId")
     default Optional<Group> saveOptional(Group group) {
         return Optional.of(save(group));
     }
 
     @Override
-    @CacheEvict(value = {"groupEntityGroupId", "groupEntityByOwnerId"}, allEntries = true)
+    @CacheEvict(value = {"groupEntityGroupId", "groupEntityByOwnerId", "adminResponseServiceStart"}, allEntries = true)
     void delete(Group group);
 }

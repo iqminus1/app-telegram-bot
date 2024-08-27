@@ -16,7 +16,7 @@ public class LangServiceImpl implements LangService {
     private final ResourceBundleMessageSource messageSource;
     private final CommonUtils commonUtils;
 
-    @Cacheable(value = "languageMessage",key = "#commonUtils.getUserLang(#userId)")
+    @Cacheable(value = "languageMessage", key = "#commonUtils.getUserLang(#userId)")
     @Override
     public String getMessage(LangFields keyword, long userId) {
         try {
@@ -26,7 +26,7 @@ public class LangServiceImpl implements LangService {
         }
     }
 
-    @Cacheable(value = "languageMessage",key = "#lang")
+    @Cacheable(value = "languageMessage", key = "#lang")
     @Override
     public String getMessage(LangFields keyword, String lang) {
         try {
@@ -36,5 +36,16 @@ public class LangServiceImpl implements LangService {
         }
     }
 
+    @Override
+    public LangEnum getLanguageEnum(String text) {
+        if (text.equals(getMessage(LangFields.BUTTON_LANGUAGE_UZBEK, "Uz"))) {
+            return LangEnum.UZ;
+        } else if (text.equals(getMessage(LangFields.BUTTON_LANGUAGE_RUSSIAN, "Uz"))) {
+            return LangEnum.RU;
+        } else if (text.equals(getMessage(LangFields.BUTTON_LANGUAGE_ENGLISH, "Uz"))) {
+            return LangEnum.ENG;
+        }
+        return null;
+    }
 
 }

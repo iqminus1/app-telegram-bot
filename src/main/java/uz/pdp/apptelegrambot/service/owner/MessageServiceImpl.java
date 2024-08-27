@@ -7,6 +7,7 @@ import uz.pdp.apptelegrambot.entity.User;
 import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
 import uz.pdp.apptelegrambot.enums.StateEnum;
+import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.owner.bot.OwnerSender;
 import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
@@ -18,6 +19,7 @@ public class MessageServiceImpl implements MessageService {
     private final CommonUtils commonUtils;
     private final LangService langService;
     private final OwnerSender sender;
+    private final ButtonService buttonService;
 
     @Override
     public void process(Message message) {
@@ -55,7 +57,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private void changeLanguage(String text, Long userId) {
-        LangEnum lang = getLanguageEnum(text);
+        LangEnum lang = langService.getLanguageEnum(text);
         if (lang == null) {
             sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_LANGUAGE, userId), responseButton.start(userId));
             return;
@@ -65,22 +67,13 @@ public class MessageServiceImpl implements MessageService {
         sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_CHANGED_LANGUAGE, lang.name()), responseButton.start(userId));
     }
 
-    private LangEnum getLanguageEnum(String text) {
-        if (text.equals(langService.getMessage(LangFields.BUTTON_LANGUAGE_UZBEK, "Uz"))) {
-            return LangEnum.UZ;
-        } else if (text.equals(langService.getMessage(LangFields.BUTTON_LANGUAGE_RUSSIAN, "Uz"))) {
-            return LangEnum.RU;
-        } else if (text.equals(langService.getMessage(LangFields.BUTTON_LANGUAGE_ENGLISH, "Uz"))) {
-            return LangEnum.ENG;
-        }
-        return null;
-    }
+
 
     private void selectLanguage(long userId) {
         commonUtils.setState(userId, StateEnum.SELECT_LANGUAGE);
         String userLang = commonUtils.getUserLang(userId);
         String message = langService.getMessage(LangFields.SELECT_LANGUAGE_TEXT, userLang);
-        sender.sendMessage(userId, message, responseButton.language(userLang));
+        sender.sendMessage(userId, message, buttonService.language(userLang));
     }
 
     private void start(Long userId) {

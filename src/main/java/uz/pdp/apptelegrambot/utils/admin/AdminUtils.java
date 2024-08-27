@@ -3,6 +3,7 @@ package uz.pdp.apptelegrambot.utils.admin;
 import lombok.RequiredArgsConstructor;
 import uz.pdp.apptelegrambot.entity.UserLang;
 import uz.pdp.apptelegrambot.enums.LangEnum;
+import uz.pdp.apptelegrambot.enums.StateEnum;
 import uz.pdp.apptelegrambot.repository.UserLangRepository;
 
 import java.util.Optional;
@@ -13,6 +14,19 @@ import java.util.concurrent.ConcurrentMap;
 public class AdminUtils {
     private final UserLangRepository userLangRepository;
     private final ConcurrentMap<Long, UserLang> usersLang = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, StateEnum> userState = new ConcurrentHashMap<>();
+
+    public void setUserState(Long userId, StateEnum stateEnum) {
+        userState.put(userId, stateEnum);
+    }
+
+    public StateEnum getUserState(Long userId) {
+        if (userState.containsKey(userId)) {
+            return userState.get(userId);
+        }
+        setUserState(userId, StateEnum.START);
+        return getUserState(userId);
+    }
 
     public void setUserLang(Long userId, String lang) {
         Optional<UserLang> optionalUserLang = userLangRepository.findById(userId);

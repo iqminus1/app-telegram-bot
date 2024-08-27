@@ -32,16 +32,4 @@ public class ResponseButton {
         return buttonService.withString(list);
     }
 
-    @Cacheable(value = "responseButtonLanguage", key = "#lang")
-    public ReplyKeyboard language(String lang) {
-        List<String> list = new ArrayList<>();
-
-        list.add(langService.getMessage(LangFields.BUTTON_LANGUAGE_UZBEK, lang));
-
-        list.add(langService.getMessage(LangFields.BUTTON_LANGUAGE_RUSSIAN, lang));
-
-        list.add(langService.getMessage(LangFields.BUTTON_LANGUAGE_ENGLISH, lang));
-
-        return buttonService.withString(list);
-    }
 }

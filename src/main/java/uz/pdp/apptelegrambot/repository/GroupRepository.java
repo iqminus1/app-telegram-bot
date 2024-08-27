@@ -29,4 +29,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     void delete(Group group);
 
     Optional<Group> findByBotUsername(String botUsername);
+
+    Optional<Group> findByBotToken(String text);
 }

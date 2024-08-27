@@ -20,6 +20,7 @@ import java.util.List;
 
 @EnableAsync
 public class AdminSender extends DefaultAbsSender {
+    private String username = null;
 
     public AdminSender(String token) {
         super(new DefaultBotOptions(), token);
@@ -53,8 +54,11 @@ public class AdminSender extends DefaultAbsSender {
 
     public String getBotUsername() {
         try {
-            User bot = execute(new GetMe());
-            return bot.getUserName();
+            if (username == null) {
+                User bot = execute(new GetMe());
+                username = bot.getUserName();
+            }
+            return username;
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }

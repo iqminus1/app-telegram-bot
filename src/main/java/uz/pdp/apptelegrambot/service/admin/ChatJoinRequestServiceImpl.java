@@ -50,6 +50,7 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
             defaultLang = LangEnum.RU.name();
         }
         adminUtils.setUserLang(userId, defaultLang);
+        adminUtils.setUserLang(userId, defaultLang);
         String message = langService.getMessage(LangFields.PAID_GROUP_TEXT, languageCode);
         sender.sendMessage(userId, message, adminResponseButton.start(groupId, defaultLang));
     }

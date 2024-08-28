@@ -9,10 +9,8 @@ import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.GetMe;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.ChatInviteLink;
-import org.telegram.telegrambots.meta.api.objects.File;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -174,6 +172,25 @@ public class AdminSender extends DefaultAbsSender {
                 throw new RuntimeException(ex);
             }
             return execute.getInviteLink();
+        }
+    }
+
+    public void deleteMessage(Long userId, Integer messageId) {
+        try {
+            execute(new DeleteMessage(userId.toString(), messageId));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteKeyboard(Long userId) {
+        try {
+            SendMessage sendMessage = new SendMessage(userId.toString(), ".");
+            sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+            Message message = execute(sendMessage);
+            deleteMessage(userId, message.getMessageId());
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
         }
     }
 }

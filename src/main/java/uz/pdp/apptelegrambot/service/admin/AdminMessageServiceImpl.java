@@ -17,10 +17,14 @@ import uz.pdp.apptelegrambot.repository.OrderRepository;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
+import uz.pdp.apptelegrambot.service.admin.sceduled.AdminResponseText;
 import uz.pdp.apptelegrambot.utils.AppConstant;
 import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -33,6 +37,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     private final ButtonService buttonService;
     private final CodeGroupRepository codeGroupRepository;
     private final OrderRepository orderRepository;
+    private final AdminResponseText responseText;
     private final String token;
 
     @Override
@@ -52,13 +57,13 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                         if (text.equals(langService.getMessage(LangFields.BUTTON_LANG_SETTINGS, userLang))) {
                             selectLanguage(userId);
                         } else if (text.equals(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_PAYME_TEXT, userLang))) {
-                            checkAndSendTariffs(userId, userLang, AppConstant.PAYME, 1);
+                            sendPaymePaymentLink(userId, userLang);
                         } else if (text.equals(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_CLICK_TEXT, userLang))) {
-                            checkAndSendTariffs(userId, userLang, AppConstant.CLICK, 1);
+                            sendClickPaymentLink(userId, userLang);
                         } else if (text.equals(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_CODE_TEXT, userLang))) {
                             sendCodeText(userId, userLang);
                         } else if (text.equals(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_SCREENSHOT_TEXT, userLang))) {
-                            checkAndSendTariffs(userId, userLang, AppConstant.SCREENSHOT, 2);
+                            checkAndSendTariffs(userId, userLang, AppConstant.SCREENSHOT);
                         }
                     }
                     case SELECT_LANGUAGE -> changeLanguage(text, userId, userLang);
@@ -71,8 +76,33 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         }
     }
 
+    private void sendPaymePaymentLink(Long userId, String userLang) {
+        String link = "https://payme.uz/";
+        Map<String, String> paymentData = responseText.getPaymentData(userLang, groupRepository.findByBotToken(sender.token).orElseThrow().getId(), userId);
+        Base64.Encoder encoder = Base64.getEncoder();
+        paymentData.forEach((text, data) -> {
+            byte[] encode = encoder.encode(("perId=1/payment=1/amount=2000" + data).getBytes(StandardCharsets.UTF_8));
+            paymentData.put(text, link + new String(encode));
+        });
+        sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_CHOOSE_TARIFF_FOR_JOIN_TEXT, userLang), responseButton.callbackWithLink(paymentData));
+    }
+
+    private void sendClickPaymentLink(Long userId, String userLang) {
+        String link = "https://click.uz/perId=1/payment=1/amount=2000";
+        Map<String, String> paymentData = responseText.getPaymentData(userLang, groupRepository.findByBotToken(sender.token).orElseThrow().getId(), userId);
+        paymentData.forEach((text, data) -> {
+            paymentData.put(text, link + data);
+        });
+        sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_CHOOSE_TARIFF_FOR_JOIN_TEXT, userLang), responseButton.callbackWithLink(paymentData));
+    }
+
     private void checkCode(String text, Long userId, String userLang) {
         Group group = groupRepository.findByBotToken(token).orElseThrow();
+        if (group.isScreenShot()) {
+            adminUtils.setUserState(userId, StateEnum.START);
+            sender.sendMessage(userId, langService.getMessage(LangFields.SECTION_DONT_WORK_TEXT, userLang), responseButton.start(group.getId(), userLang));
+            return;
+        }
         Optional<CodeGroup> optionalCodeGroup = codeGroupRepository.findByCodeAndBotId(text, group.getId());
         if (optionalCodeGroup.isEmpty()) {
             adminUtils.setUserState(userId, StateEnum.START);
@@ -115,18 +145,14 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         sender.sendMessageAndRemove(userId, langService.getMessage(LangFields.SEND_CODE_FOR_JOIN_REQ_TEXT, userLang));
     }
 
-    private void checkAndSendTariffs(Long userId, String userLang, String data, int i) {
+    private void checkAndSendTariffs(Long userId, String userLang, String data) {
         Group group = groupRepository.findByBotToken(token).orElseThrow();
-        if (i == 1) {
-            if (!group.isPayment())
-                return;
-        } else if (i == 2) {
-            if (!group.isScreenShot())
-                return;
-        }
+        if (!group.isScreenShot())
+            return;
 
 
         InlineKeyboardMarkup markup = responseButton.tariffList(group.getId(), data, userLang);
+        sender.deleteKeyboard(userId);
         sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_CHOOSE_TARIFF_FOR_JOIN_TEXT, userLang), markup);
     }
 

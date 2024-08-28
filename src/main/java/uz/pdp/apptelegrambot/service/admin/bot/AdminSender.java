@@ -157,26 +157,30 @@ public class AdminSender extends DefaultAbsSender {
         }
     }
 
+    public void deleteInviteLink(Long groupId, String link) {
+        try {
+            execute(new RevokeChatInviteLink(groupId.toString(), link));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public String getLink(Long groupId) {
         try {
-            EditChatInviteLink editChatInviteLink = new EditChatInviteLink();
-            editChatInviteLink.setChatId(groupId);
-            editChatInviteLink.setName(AppConstant.LINK_NAME);
-            ChatInviteLink execute = execute(editChatInviteLink);
-            return execute.getInviteLink();
+            return createLink(groupId);
         } catch (TelegramApiException e) {
-            CreateChatInviteLink createChatInviteLink = new CreateChatInviteLink();
-            createChatInviteLink.setChatId(groupId);
-            createChatInviteLink.setCreatesJoinRequest(true);
-            createChatInviteLink.setName(AppConstant.LINK_NAME);
-            ChatInviteLink execute = null;
-            try {
-                execute = execute(createChatInviteLink);
-            } catch (TelegramApiException ex) {
-                throw new RuntimeException(ex);
-            }
-            return execute.getInviteLink();
+            throw new RuntimeException("Не удалось создать или обновить ссылку на приглашение", e);
         }
+    }
+
+    private String createLink(Long groupId) throws TelegramApiException {
+        CreateChatInviteLink createChatInviteLink = new CreateChatInviteLink();
+        createChatInviteLink.setChatId(groupId);
+        createChatInviteLink.setCreatesJoinRequest(true);
+        createChatInviteLink.setName(AppConstant.LINK_NAME);
+        createChatInviteLink.setExpireDate(2);
+        ChatInviteLink execute = execute(createChatInviteLink);
+        return execute.getInviteLink();
     }
 
     public void deleteMessage(Long userId, Integer messageId) {

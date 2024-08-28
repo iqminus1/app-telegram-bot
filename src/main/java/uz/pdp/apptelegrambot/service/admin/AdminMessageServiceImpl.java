@@ -120,7 +120,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
 
     private void checkCode(String text, Long userId, String userLang) {
         Group group = groupRepository.findByBotToken(token).orElseThrow();
-        if (group.isScreenShot()) {
+        if (!group.isCode()) {
             adminUtils.setUserState(userId, StateEnum.START);
             sender.sendMessage(userId, langService.getMessage(LangFields.SECTION_DONT_WORK_TEXT, userLang), responseButton.start(group.getId(), userLang));
             return;
@@ -132,10 +132,17 @@ public class AdminMessageServiceImpl implements AdminMessageService {
             return;
         }
         CodeGroup codeGroup = optionalCodeGroup.get();
+        codeGroup.setUserId(userId);
+        codeGroup.setActive(true);
+        codeGroup.setActiveAt(LocalDateTime.now());
+        codeGroupRepository.saveOptional(codeGroup);
         Optional<Order> optionalOrder = orderRepository.findByUserIdAndGroupId(userId, group.getGroupId());
         if (optionalOrder.isPresent()) {
             Order order = updateOrderExpire(optionalOrder.get(), codeGroup);
             orderRepository.save(order);
+            adminUtils.setUserState(userId, StateEnum.START);
+            sender.sendMessage(userId, langService.getMessage(LangFields.JOIN_REQ_CODE_VALID_TEXT, userLang) + " -> " + sender.getLink(group.getGroupId()), responseButton.start(group.getId(), userLang));
+            return;
         }
         Order order = updateOrderExpire(new Order(), codeGroup);
         order.setUserId(userId);
@@ -147,16 +154,19 @@ public class AdminMessageServiceImpl implements AdminMessageService {
 
     private static Order updateOrderExpire(Order order, CodeGroup codeGroup) {
         ExpireType type = codeGroup.getType();
+        if (order.getExpireDay() == null) {
+            order.setExpireDay(LocalDateTime.now());
+        }
         if (type == ExpireType.WEEK)
-            order.setExpireDay(order.getExpireDay().plusWeeks(1L));
+            order.setExpireDay(order.getExpireDay().plusWeeks(1));
         if (type == ExpireType.DAY_15)
-            order.setExpireDay(order.getExpireDay().plusDays(15L));
+            order.setExpireDay(order.getExpireDay().plusDays(15));
         if (type == ExpireType.MONTH)
-            order.setExpireDay(order.getExpireDay().plusMonths(1L));
+            order.setExpireDay(order.getExpireDay().plusMonths(1));
         if (type == ExpireType.YEAR)
-            order.setExpireDay(order.getExpireDay().plusYears(1L));
+            order.setExpireDay(order.getExpireDay().plusYears(1));
         if (type == ExpireType.UNLIMITED) {
-            order.setExpireDay(LocalDateTime.MAX);
+            order.setExpireDay(LocalDateTime.now().plusYears(100));
             order.setUnlimited(true);
         }
         return order;

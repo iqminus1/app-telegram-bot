@@ -13,6 +13,8 @@ public interface AppConstant {
     String FILE_PATH = "C:\\Users\\User\\Desktop\\app-telegram-bot\\files";
     String LINK_NAME = "create by bot";
     String BOT_DATA = "botId:";
+    String FREE_DATA = "freeData:";
+    String GENERATE_CODE_FOR_TARIFF_DATA = "codeByTariff:";
     //backToBotList
     String BACK_TO_BOT_LIST_DATA = "backTBL";
 
@@ -22,4 +24,7 @@ public interface AppConstant {
     String CARD_NUMBER_DATA = "addCardNumberBBI:";
     String GENERATE_CODE_DATA = "generateCodeBBI:";
     String START_STOP_BOT_DATA = "startStopBotBBI:";
+    String PAMYENT_MATHODS_DATA = "paymentMethodsBBI:";
+    String BACK_TO_BOT_INFO_DATA = "backToBotInfoBBI:";
+    String SEE_ALL_SCREENSHOTS = "seeAllScreenshotsBBI:";
 }

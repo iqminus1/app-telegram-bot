@@ -14,7 +14,9 @@ import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.Order;
+import uz.pdp.apptelegrambot.repository.GroupRepository;
 import uz.pdp.apptelegrambot.utils.AppConstant;
 
 import java.io.IOException;
@@ -31,10 +33,12 @@ import java.util.concurrent.TimeUnit;
 public class AdminSender extends DefaultAbsSender {
     private String username = null;
     public final String token;
+    private final GroupRepository groupRepository;
 
-    public AdminSender(String token) {
+    public AdminSender(String token, GroupRepository groupRepository) {
         super(new DefaultBotOptions(), token);
         this.token = token;
+        this.groupRepository = groupRepository;
     }
 
     @Async
@@ -192,5 +196,9 @@ public class AdminSender extends DefaultAbsSender {
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Group getGroup() {
+        return groupRepository.findByBotToken(token).orElseThrow();
     }
 }

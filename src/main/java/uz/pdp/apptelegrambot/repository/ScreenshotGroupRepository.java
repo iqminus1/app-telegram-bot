@@ -25,5 +25,4 @@ public interface ScreenshotGroupRepository extends JpaRepository<ScreenshotGroup
     default Optional<ScreenshotGroup> saveOptional(ScreenshotGroup screenshotGroup) {
         return Optional.of(save(screenshotGroup));
     }
-
 }

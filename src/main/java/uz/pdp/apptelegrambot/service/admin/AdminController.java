@@ -25,24 +25,27 @@ public class AdminController {
     private final LangService langService;
     private final ButtonService buttonService;
     private final UserLangRepository userLangRepository;
-    private final Temp temp;
     private final TariffRepository tariffRepository;
     private final ResponseText responseText;
+    private final Temp temp;
     private final CodeGroupRepository codeGroupRepository;
     private final AdminResponseText adminResponseText;
+    private final ScreenshotGroupRepository screenshotGroupRepository;
     Map<Long, AdminSender> adminSender = new ConcurrentHashMap<>();
 
 
     public void addAdminBot(String token, Long adminId) {
-        AdminSender sender = new AdminSender(token);
+        AdminSender sender = new AdminSender(token, groupRepository);
         adminSender.put(adminId, sender);
         setBotToken(sender, adminId);
+        AdminTemp adminTemp = new AdminTemp();
         AdminUtils adminUtils = new AdminUtils(userLangRepository);
         MyChatMemberService myChatMemberService = new MyChatMemberServiceImpl(groupRepository, sender);
         AdminResponseButton adminResponseButton = new AdminResponseButton(buttonService, groupRepository, langService, tariffRepository, responseText);
-        AdminMessageServiceImpl adminMessageService = new AdminMessageServiceImpl(sender, langService, adminUtils, adminResponseButton, groupRepository, buttonService, codeGroupRepository, orderRepository, adminResponseText, token);
+        AdminMessageServiceImpl adminMessageService = new AdminMessageServiceImpl(sender, langService, adminUtils, adminResponseButton, groupRepository, buttonService, codeGroupRepository, orderRepository, adminResponseText, adminTemp, screenshotGroupRepository, token);
         ChatJoinRequestService chatJoinRequestService = new ChatJoinRequestServiceImpl(sender, orderRepository, langService, adminResponseButton, groupRepository, adminUtils);
-        AdminProcessService adminProcessService = new AdminProcessServiceImpl(myChatMemberService, chatJoinRequestService, adminMessageService);
+        AdminCallbackServiceImpl callbackService = new AdminCallbackServiceImpl(sender, adminResponseButton, langService, adminUtils, tariffRepository, adminTemp);
+        AdminProcessService adminProcessService = new AdminProcessServiceImpl(myChatMemberService, chatJoinRequestService, adminMessageService, callbackService);
         new AdminBot(token, adminId, adminProcessService, groupRepository);
     }
 

@@ -5,6 +5,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.Tariff;
 import uz.pdp.apptelegrambot.enums.LangFields;
@@ -59,5 +60,17 @@ public class AdminResponseButton {
             list.add(Map.of(responseText.getTariffExpireText(tariff.getType().ordinal(), userLang), data + "+" + AppConstant.TARIFF_DATA + tariff.getId()));
         }
         return buttonService.callbackKeyboard(list);
+    }
+
+    public InlineKeyboardMarkup callbackWithLink(Map<String, String> map) {
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        for (String text : map.keySet()) {
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(text);
+            inlineKeyboardButton.setUrl(map.get(text));
+            buttons.add(List.of(inlineKeyboardButton));
+        }
+        markup.setKeyboard(buttons);
+        return markup;
     }
 }

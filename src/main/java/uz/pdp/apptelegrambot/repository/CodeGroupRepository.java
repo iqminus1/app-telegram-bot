@@ -11,15 +11,15 @@ import java.util.Optional;
 
 @Repository
 public interface CodeGroupRepository extends JpaRepository<CodeGroup, Long> {
-    @Cacheable(value = "codeGroupEntity", key = "#code" + "+" + "#groupId")
-    Optional<CodeGroup> findByCodeAndGroupId(String code, Long groupId);
+    @Cacheable(value = "codeGroupEntity", key = "#code" + "+" + "#botId")
+    Optional<CodeGroup> findByCodeAndBotId(String code, Long botId);
 
-    @CachePut(value = "codeGroupEntity", key = "#codeGroup.code" + "+" + "#codeGroup.groupId")
+    @CachePut(value = "codeGroupEntity", key = "#codeGroup.code" + "+" + "#codeGroup.botId")
     default Optional<CodeGroup> saveOptional(CodeGroup codeGroup) {
         return Optional.of(save(codeGroup));
     }
 
-    @CacheEvict(value = "codeGroupEntity", key = "#codeGroup.code" + "+" + "#codeGroup.groupId")
+    @CacheEvict(value = "codeGroupEntity", key = "#codeGroup.code" + "+" + "#codeGroup.botId")
     @Override
     void delete(CodeGroup codeGroup);
 }

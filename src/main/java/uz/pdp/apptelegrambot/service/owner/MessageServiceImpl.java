@@ -5,17 +5,22 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import uz.pdp.apptelegrambot.entity.Group;
+import uz.pdp.apptelegrambot.entity.Tariff;
 import uz.pdp.apptelegrambot.entity.User;
 import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
 import uz.pdp.apptelegrambot.enums.StateEnum;
 import uz.pdp.apptelegrambot.repository.GroupRepository;
+import uz.pdp.apptelegrambot.repository.TariffRepository;
 import uz.pdp.apptelegrambot.repository.UserRepository;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.AdminController;
 import uz.pdp.apptelegrambot.service.owner.bot.OwnerSender;
 import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
+
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,8 @@ public class MessageServiceImpl implements MessageService {
     private final GroupRepository groupRepository;
     private final Temp temp;
     private final AdminController adminController;
+    private final TariffRepository tariffRepository;
+    private final ResponseText responseText;
 
     @Override
     public void process(Message message) {
@@ -53,6 +60,7 @@ public class MessageServiceImpl implements MessageService {
                     }
                     case SELECT_LANGUAGE -> changeLanguage(text, userId);
                     case SENDING_BOT_TOKEN -> setToken(text, userId);
+                    case SENDING_TARIFF_PRICE -> setTariffPrice(message);
                     default ->
                             sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, userId), responseButton.start(userId));
 
@@ -66,6 +74,31 @@ public class MessageServiceImpl implements MessageService {
                 }
             }
         }
+    }
+
+    private void setTariffPrice(Message message) {
+        Long userId = message.getFrom().getId();
+        List<Tariff> tempTariffs = temp.getTempTariffs(userId);
+        long price;
+        try {
+            price = Long.parseLong(message.getText());
+        } catch (Exception e) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.SEND_VALID_PRICE_FOR_TARIFF_TEXT, userId));
+            return;
+        }
+        tempTariffs.sort(Comparator.comparing(t -> t.getType().ordinal()));
+        Tariff tariff = tempTariffs.get(0);
+        tempTariffs.remove(tariff);
+        tariff.setPrice(price);
+        temp.removeTempTariff(tariff.getType().ordinal(), userId);
+        tariffRepository.saveOptional(tariff);
+        if (tempTariffs.isEmpty()) {
+            temp.clearTemp(userId);
+            commonUtils.setState(userId, StateEnum.START);
+            sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_ADDED_TARIFF_PRICE_TEXT, userId), responseButton.start(userId));
+            return;
+        }
+        sender.sendMessage(userId, responseText.getSendExpireText(tempTariffs.get(0).getType().ordinal(), userId));
     }
 
     private void setUserContactNumber(Message message) {

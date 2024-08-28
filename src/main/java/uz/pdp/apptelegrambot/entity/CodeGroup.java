@@ -19,7 +19,7 @@ import java.sql.Timestamp;
 public class CodeGroup extends AbsLongEntity implements Serializable {
     private String code;
 
-    private Long groupId;
+    private Long botId;
 
     private Long userId;
 

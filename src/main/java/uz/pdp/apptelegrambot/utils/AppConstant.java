@@ -8,4 +8,11 @@ public interface AppConstant {
     String RED_TEXT = " \uD83D\uDD34";
     String EMPTY_TEXT = " \uDB40\uDC6A";
     String ACCEPT_TARIFFS_DATA = "acceptTariffs";
+    String PAYME = "payment:Payme";
+    String CLICK = "payment:Click";
+    String CODE = "payment:Code";
+    String SCREENSHOT = "payment:Screenshot";
+    String TARIFF_DATA = "tariffId:";
+    String FILE_PATH = "";
+    String LINK_NAME = "create by bot";
 }

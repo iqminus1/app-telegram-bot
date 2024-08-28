@@ -28,7 +28,5 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     @CacheEvict(value = {"groupEntityGroupId", "groupEntityByOwnerId", "adminResponseServiceStart"}, allEntries = true)
     void delete(Group group);
 
-    Optional<Group> findByBotUsername(String botUsername);
-
     Optional<Group> findByBotToken(String text);
 }

@@ -10,7 +10,7 @@ import uz.pdp.apptelegrambot.repository.OrderRepository;
 import uz.pdp.apptelegrambot.service.admin.AdminController;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +26,7 @@ public class AdminScheduledProcess {
     @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.HOURS)
     public void kickUsersFromGroups() {
         Map<Long, List<Order>> collect = orderRepository.findAll().stream()
-                .filter(o -> o.getExpireDay().before(new Date()))
+                .filter(o -> o.getExpireDay().isBefore(LocalDateTime.now()))
                 .collect(Collectors.groupingBy(Order::getGroupId));
         for (Long groupId : collect.keySet()) {
             Group group = groupRepository.findByGroupId(groupId).orElseThrow();

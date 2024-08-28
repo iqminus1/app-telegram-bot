@@ -23,7 +23,7 @@ public class MyChatMemberServiceImpl implements MyChatMemberService {
         Long groupId = chatMember.getChat().getId();
         if (Objects.equals(chatMember.getNewChatMember().getUser().getUserName(), username)) {
             if (List.of(ChatMemberOwner.STATUS, ChatMemberAdministrator.STATUS).contains(chatMember.getNewChatMember().getStatus())) {
-                groupRepository.findByBotUsername(username).ifPresent(g -> {
+                groupRepository.findByBotToken(sender.token).ifPresent(g -> {
                     if (g.getGroupId() == null) {
                         g.setGroupId(groupId);
                         g.setName(chatMember.getChat().getTitle());

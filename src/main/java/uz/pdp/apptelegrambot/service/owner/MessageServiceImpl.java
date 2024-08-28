@@ -56,6 +56,8 @@ public class MessageServiceImpl implements MessageService {
                             contactUs(userId);
                         } else if (checkStrings(text, LangFields.BUTTON_ADD_BOT, userId)) {
                             sendAddBotText(userId, user);
+                        } else if (checkStrings(text, LangFields.BUTTON_MY_BOTS, userId)) {
+                            sendListBots(userId);
                         }
                     }
                     case SELECT_LANGUAGE -> changeLanguage(text, userId);
@@ -74,6 +76,17 @@ public class MessageServiceImpl implements MessageService {
                 }
             }
         }
+    }
+
+    private void sendListBots(Long userId) {
+        List<Group> groups = groupRepository.findAllByAdminId(userId);
+        if (groups.isEmpty()) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.DONT_HAVE_ANY_BOT_TEXT, userId));
+            return;
+        }
+
+        InlineKeyboardMarkup markup = responseButton.botsList(userId);
+        sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_CHOOSE_BOT_TEXT, userId), markup);
     }
 
     private void setTariffPrice(Message message) {
@@ -128,6 +141,7 @@ public class MessageServiceImpl implements MessageService {
         group.setBotToken(text);
         group.setCode(true);
         group.setScreenShot(true);
+        group.setWorked(true);
         temp.addTempGroup(group);
         adminController.addAdminBot(text, userId);
         commonUtils.setState(userId, StateEnum.SELECTING_TARIFF);

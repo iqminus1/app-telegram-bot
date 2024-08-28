@@ -8,9 +8,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.Tariff;
 import uz.pdp.apptelegrambot.enums.ExpireType;
 import uz.pdp.apptelegrambot.enums.LangFields;
+import uz.pdp.apptelegrambot.repository.GroupRepository;
 import uz.pdp.apptelegrambot.repository.TariffRepository;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
@@ -27,6 +29,7 @@ public class ResponseButton {
     private final LangService langService;
     private final TariffRepository tariffRepository;
     private final Temp temp;
+    private final GroupRepository groupRepository;
 
     @Cacheable(value = "responseButtonStart", key = "#userId")
     public ReplyKeyboard start(long userId) {
@@ -94,6 +97,33 @@ public class ResponseButton {
         }
 
         list.add(Map.of(langService.getMessage(LangFields.ACCEPT_TARIFFS_TEXT, userId), AppConstant.ACCEPT_TARIFFS_DATA));
+
+        return buttonService.callbackKeyboard(list);
+    }
+
+    public InlineKeyboardMarkup botsList(Long userId) {
+        List<Group> groups = groupRepository.findAllByAdminId(userId);
+        List<Map<String, String>> list = new ArrayList<>();
+        for (Group group : groups) {
+            list.add(Map.of("@" + group.getBotUsername(), AppConstant.BOT_DATA + group.getId()));
+        }
+        return buttonService.callbackKeyboard(list);
+    }
+
+    public InlineKeyboardMarkup botInfo(long botId, long userId) {
+        List<Map<String, String>> list = new ArrayList<>();
+
+        list.add(Map.of(langService.getMessage(LangFields.TARIFF_LIST_TEXT, userId), AppConstant.TARIFF_LIST_DATA + botId));
+        list.add(Map.of(langService.getMessage(LangFields.ADD_TARIFF_TEXT, userId), AppConstant.ADD_TARIFF_DATA + botId));
+        list.add(Map.of(langService.getMessage(LangFields.CARD_NUMBER_TEXT, userId), AppConstant.CARD_NUMBER_DATA + botId));
+        list.add(Map.of(langService.getMessage(LangFields.GENERATE_CODE_TEXT, userId), AppConstant.GENERATE_CODE_DATA + botId));
+        Group group = groupRepository.findById(botId).orElseThrow();
+        if (group.isWorked()) {
+            list.add(Map.of(langService.getMessage(LangFields.STOP_BOT_TEXT, userId), AppConstant.START_STOP_BOT_DATA + botId));
+        } else
+            list.add(Map.of(langService.getMessage(LangFields.START_BOT_TEXT, userId), AppConstant.START_STOP_BOT_DATA + botId));
+
+        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userId), AppConstant.BACK_TO_BOT_LIST_DATA));
 
         return buttonService.callbackKeyboard(list);
     }

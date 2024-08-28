@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.repository.GroupRepository;
 import uz.pdp.apptelegrambot.service.admin.AdminProcessService;
 
@@ -33,8 +34,9 @@ public class AdminBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        LocalDateTime expireAt = groupRepository.findByBotToken(token).orElseThrow().getExpireAt();
-        if (LocalDateTime.now().isBefore(expireAt))
+        Group group = groupRepository.findByBotToken(token).orElseThrow();
+        LocalDateTime expireAt = group.getExpireAt();
+        if (group.isWorked() || LocalDateTime.now().isBefore(expireAt))
             adminProcessService.process(update, adminId);
     }
 

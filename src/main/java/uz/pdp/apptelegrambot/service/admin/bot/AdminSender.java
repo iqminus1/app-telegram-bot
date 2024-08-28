@@ -2,28 +2,41 @@ package uz.pdp.apptelegrambot.service.admin.bot;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.util.StreamUtils;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.GetMe;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.ApproveChatJoinRequest;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.BanChatMember;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.UnbanChatMember;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.ChatInviteLink;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.pdp.apptelegrambot.entity.Order;
+import uz.pdp.apptelegrambot.utils.AppConstant;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class AdminSender extends DefaultAbsSender {
     private String username = null;
+    public final String token;
 
     public AdminSender(String token) {
         super(new DefaultBotOptions(), token);
+        this.token = token;
     }
 
     @Async
@@ -113,5 +126,54 @@ public class AdminSender extends DefaultAbsSender {
     @Scheduled(fixedRate = 1, timeUnit = TimeUnit.HOURS)
     public void process() {
         username = null;
+    }
+
+    public String getFilePath(PhotoSize photoSize) {
+        GetFile getFile = new GetFile(photoSize.getFileId());
+        try {
+            File execute = execute(getFile);
+
+            String fileUrl = execute.getFileUrl(token);
+
+            String fileName = UUID.randomUUID().toString();
+            String[] split = fileUrl.split("\\.");
+            String fileExtension = split[split.length - 1];
+            String filePath = fileName + "." + fileExtension;
+
+            Path targetPath = Paths.get(AppConstant.FILE_PATH, filePath);
+
+            Files.createDirectories(targetPath.getParent());
+
+            try (InputStream inputStream = new URL(fileUrl).openStream();
+                 OutputStream outputStream = Files.newOutputStream(targetPath)) {
+                StreamUtils.copy(inputStream, outputStream);
+            }
+
+            return targetPath.toString();
+        } catch (TelegramApiException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getLink(Long groupId) {
+        try {
+            EditChatInviteLink editChatInviteLink = new EditChatInviteLink();
+            editChatInviteLink.setChatId(groupId);
+            editChatInviteLink.setName(AppConstant.LINK_NAME);
+            ChatInviteLink execute = execute(editChatInviteLink);
+            return execute.getInviteLink();
+        } catch (TelegramApiException e) {
+            CreateChatInviteLink createChatInviteLink = new CreateChatInviteLink();
+            createChatInviteLink.setChatId(groupId);
+            createChatInviteLink.setCreatesJoinRequest(true);
+            createChatInviteLink.setName(AppConstant.LINK_NAME);
+            ChatInviteLink execute = null;
+            try {
+                execute = execute(createChatInviteLink);
+            } catch (TelegramApiException ex) {
+                throw new RuntimeException(ex);
+            }
+            return execute.getInviteLink();
+        }
     }
 }

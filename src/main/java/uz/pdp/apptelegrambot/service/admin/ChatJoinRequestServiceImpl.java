@@ -2,6 +2,7 @@ package uz.pdp.apptelegrambot.service.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.ChatJoinRequest;
+import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.Order;
 import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
@@ -11,7 +12,7 @@ import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
 import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         Long userId = chatJoinRequest.getUser().getId();
         Optional<Order> optionalOrder = orderRepository.findByUserIdAndGroupId(userId, groupId);
         if (optionalOrder.isPresent()) {
-            if (optionalOrder.get().getExpireDay().after(new Date())) {
+            if (optionalOrder.get().isUnlimited() || optionalOrder.get().getExpireDay().isAfter(LocalDateTime.now())) {
                 sender.acceptJoinRequest(userId, groupId);
                 return;
             }
@@ -51,7 +52,8 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         }
         adminUtils.setUserLang(userId, defaultLang);
         adminUtils.setUserLang(userId, defaultLang);
+        Group group = groupRepository.findByGroupId(groupId).orElseThrow();
         String message = langService.getMessage(LangFields.PAID_GROUP_TEXT, languageCode);
-        sender.sendMessage(userId, message, adminResponseButton.start(groupId, defaultLang));
+        sender.sendMessage(userId, message, adminResponseButton.start(group.getId(), defaultLang));
     }
 }

@@ -2,10 +2,11 @@ package uz.pdp.apptelegrambot.entity;
 
 import jakarta.persistence.Entity;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,12 +14,13 @@ import java.sql.Timestamp;
 @Getter
 @ToString
 @Entity(name = "orders")
+@SQLRestriction("unlimited = false")
 public class Order extends AbsLongEntity implements Serializable {
     private Long userId;
 
     private Long groupId;
 
-    private Timestamp expireDay;
+    private LocalDateTime expireDay;
 
     private boolean unlimited;
 }

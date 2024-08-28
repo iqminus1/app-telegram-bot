@@ -14,6 +14,7 @@ import uz.pdp.apptelegrambot.service.owner.ResponseText;
 import uz.pdp.apptelegrambot.service.owner.Temp;
 import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,6 +60,7 @@ public class AdminController {
         if (tempGroup == null)
             return;
         tempGroup.setBotUsername(sender.getBotUsername());
+        tempGroup.setExpireAt(LocalDateTime.now());
         groupRepository.saveOptional(tempGroup);
 
     }

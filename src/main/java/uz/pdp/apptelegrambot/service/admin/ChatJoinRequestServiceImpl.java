@@ -36,6 +36,7 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         if (optionalOrder.isPresent()) {
             if (optionalOrder.get().isUnlimited() || optionalOrder.get().getExpireDay().isAfter(LocalDateTime.now())) {
                 sender.acceptJoinRequest(userId, groupId);
+                sender.deleteInviteLink(groupId, chatJoinRequest.getInviteLink().getInviteLink());
                 return;
             }
         }

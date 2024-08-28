@@ -36,7 +36,7 @@ public class AdminBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         Group group = groupRepository.findByBotToken(token).orElseThrow();
         LocalDateTime expireAt = group.getExpireAt();
-        if (group.isWorked() || LocalDateTime.now().isBefore(expireAt))
+        if (group.isWorked() && LocalDateTime.now().isBefore(expireAt))
             adminProcessService.process(update, adminId);
     }
 

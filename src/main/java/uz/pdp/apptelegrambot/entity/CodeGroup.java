@@ -7,7 +7,7 @@ import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
 import uz.pdp.apptelegrambot.enums.ExpireType;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,7 +27,7 @@ public class CodeGroup extends AbsLongEntity implements Serializable {
 
     private boolean active;
 
-    private Timestamp activeAt;
+    private LocalDateTime activeAt;
 
     private Long tariffId;
 

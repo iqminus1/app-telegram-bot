@@ -4,19 +4,24 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import uz.pdp.apptelegrambot.entity.CodeGroup;
 import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.Tariff;
 import uz.pdp.apptelegrambot.entity.User;
 import uz.pdp.apptelegrambot.enums.ExpireType;
 import uz.pdp.apptelegrambot.enums.LangFields;
 import uz.pdp.apptelegrambot.enums.StateEnum;
+import uz.pdp.apptelegrambot.repository.CodeGroupRepository;
 import uz.pdp.apptelegrambot.repository.GroupRepository;
+import uz.pdp.apptelegrambot.repository.TariffRepository;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.owner.bot.OwnerSender;
 import uz.pdp.apptelegrambot.utils.AppConstant;
 import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
 
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,9 @@ public class CallbackServiceImpl implements CallbackService {
     private final ResponseButton responseButton;
     private final ResponseText responseText;
     private final GroupRepository groupRepository;
+    private final TariffRepository tariffRepository;
+    private final Random random;
+    private final CodeGroupRepository codeGroupRepository;
 
     @Override
     public void process(CallbackQuery callbackQuery) {
@@ -40,6 +48,18 @@ public class CallbackServiceImpl implements CallbackService {
                     showBotInfo(callbackQuery);
                 } else if (data.equals(AppConstant.BACK_TO_BOT_LIST_DATA)) {
                     backToList(callbackQuery);
+                } else if (data.startsWith(AppConstant.TARIFF_LIST_DATA)) {
+                    showTariffList(callbackQuery);
+                } else if (data.equals(AppConstant.FREE_DATA)) {
+                    System.out.println("1");
+                } else if (data.startsWith(AppConstant.PAMYENT_MATHODS_DATA)) {
+
+                } else if (data.startsWith(AppConstant.BACK_TO_BOT_INFO_DATA)) {
+                    showBotInfo(callbackQuery);
+                } else if (data.startsWith(AppConstant.GENERATE_CODE_DATA)) {
+                    showTariffsForGenerateCode(callbackQuery);
+                } else if (data.startsWith(AppConstant.GENERATE_CODE_FOR_TARIFF_DATA)) {
+                    generateCode(callbackQuery);
                 }
             }
             case SELECTING_TARIFF -> {
@@ -50,6 +70,55 @@ public class CallbackServiceImpl implements CallbackService {
                 }
             }
         }
+    }
+
+    private void generateCode(CallbackQuery callbackQuery) {
+        long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Tariff tariff = tariffRepository.findById(tariffId).orElseThrow();
+        Long userId = callbackQuery.getFrom().getId();
+        CodeGroup codeGroup = new CodeGroup(generateCode(), tariff.getBotId(), null, tariff.getType(), false, null, tariffId, tariff.getPrice());
+        codeGroupRepository.saveOptional(codeGroup);
+        String message = getCodeText(userId, tariff.getType().ordinal());
+        sender.sendMessage(userId, message + " " + codeGroup.getCode());
+    }
+
+    private String getCodeText(Long userId, int ordinal) {
+        if (ordinal == 0) {
+            return langService.getMessage(LangFields.CODE_WEEK_TEXT, userId);
+        } else if (ordinal == 1) {
+            return langService.getMessage(LangFields.CODE_DAY15_TEXT, userId);
+        } else if (ordinal == 2) {
+            return langService.getMessage(LangFields.CODE_MONTH_TEXT, userId);
+        } else if (ordinal == 3) {
+            return langService.getMessage(LangFields.CODE_YEAR_TEXT, userId);
+        } else if (ordinal == 4) {
+            return langService.getMessage(LangFields.CODE_UNLIMITED_TEXT, userId);
+        }
+        return null;
+    }
+
+    private void showTariffsForGenerateCode(CallbackQuery callbackQuery) {
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        if (tariffRepository.findAllByBotId(botId).isEmpty()) {
+            return;
+        }
+        long userId = callbackQuery.getFrom().getId();
+        InlineKeyboardMarkup markup = responseButton.showTariffs(botId, userId, AppConstant.GENERATE_CODE_FOR_TARIFF_DATA);
+        List<List<InlineKeyboardButton>> keyboard = markup.getKeyboard();
+        if (keyboard.size() != 6) {
+            keyboard.remove(keyboard.size() - 2);
+            markup.setKeyboard(keyboard);
+        }
+        String message = langService.getMessage(LangFields.SELECT_CHOOSE_TEXT, userId);
+        sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), message, markup);
+    }
+
+    private void showTariffList(CallbackQuery callbackQuery) {
+        long userId = callbackQuery.getFrom().getId();
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        InlineKeyboardMarkup markup = responseButton.showTariffs(botId, userId, AppConstant.FREE_DATA);
+        String message = langService.getMessage(LangFields.SELECT_CHOOSE_TEXT, userId);
+        sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), message, markup);
     }
 
     private void backToList(CallbackQuery callbackQuery) {
@@ -97,5 +166,21 @@ public class CallbackServiceImpl implements CallbackService {
         Integer i = list.get(0);
         String expireText = responseText.getSendExpireText(i, userId);
         sender.sendMessage(userId, expireText);
+    }
+
+    private String generateCode() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            if (random.nextBoolean()) {
+                sb.append(random.nextInt(0, 9));
+            } else {
+                if (random.nextBoolean()) {
+                    sb.append((char) random.nextInt(65, 90));
+                } else {
+                    sb.append((char) random.nextInt(97, 122));
+                }
+            }
+        }
+        return sb.toString();
     }
 }

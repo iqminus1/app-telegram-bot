@@ -26,7 +26,7 @@ public class Group extends AbsLongEntity implements Serializable {
 
     private String cardNumber;
 
-    private String cardFirstName;
+    private String cardName;
 
     private LocalDateTime expireAt;
 

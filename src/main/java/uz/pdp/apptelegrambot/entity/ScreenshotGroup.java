@@ -5,6 +5,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
+import uz.pdp.apptelegrambot.enums.ExpireType;
 import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 
 import java.io.Serializable;
@@ -31,4 +32,6 @@ public class ScreenshotGroup extends AbsLongEntity implements Serializable {
     private Long tariffId;
 
     private Long tariffPrice;
+
+    private ExpireType type;
 }

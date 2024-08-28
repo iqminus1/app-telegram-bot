@@ -2,11 +2,13 @@ package uz.pdp.apptelegrambot.service.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import uz.pdp.apptelegrambot.entity.CodeGroup;
 import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.Order;
+import uz.pdp.apptelegrambot.entity.ScreenshotGroup;
 import uz.pdp.apptelegrambot.enums.ExpireType;
 import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
@@ -14,6 +16,7 @@ import uz.pdp.apptelegrambot.enums.StateEnum;
 import uz.pdp.apptelegrambot.repository.CodeGroupRepository;
 import uz.pdp.apptelegrambot.repository.GroupRepository;
 import uz.pdp.apptelegrambot.repository.OrderRepository;
+import uz.pdp.apptelegrambot.repository.ScreenshotGroupRepository;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
@@ -23,9 +26,7 @@ import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class AdminMessageServiceImpl implements AdminMessageService {
@@ -38,6 +39,8 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     private final CodeGroupRepository codeGroupRepository;
     private final OrderRepository orderRepository;
     private final AdminResponseText responseText;
+    private final AdminTemp temp;
+    private final ScreenshotGroupRepository screenshotGroupRepository;
     private final String token;
 
     @Override
@@ -69,16 +72,32 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                     case SELECT_LANGUAGE -> changeLanguage(text, userId, userLang);
                     case SENDING_JOIN_REQ_CODE -> checkCode(text, userId, userLang);
                     default ->
-                            sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, userLang), responseButton.start(getBotId(), userLang));
-
+                            sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, userLang), responseButton.start(sender.getGroup().getId(), userLang));
                 }
+
+
+            } else if (message.hasPhoto()) {
+                Long userId = message.getFrom().getId();
+                ScreenshotGroup tempScreenshot = temp.getTempScreenshot(userId);
+                List<PhotoSize> photo = message.getPhoto();
+                PhotoSize photoSize = photo.stream().max(Comparator.comparing(PhotoSize::getFileSize)).get();
+                String filePath = sender.getFilePath(photoSize);
+                tempScreenshot.setPath(filePath);
+
+                screenshotGroupRepository.saveOptional(tempScreenshot);
+
+                adminUtils.setUserState(userId, StateEnum.START);
+                sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_GETTING_SCREENSHOT_TEXT, adminUtils.getUserLang(userId)), null);
             }
         }
     }
 
     private void sendPaymePaymentLink(Long userId, String userLang) {
         String link = "https://payme.uz/";
-        Map<String, String> paymentData = responseText.getPaymentData(userLang, groupRepository.findByBotToken(sender.token).orElseThrow().getId(), userId);
+        Map<String, String> paymentData = responseText.getPaymentData(userLang, sender.getGroup().getId(), userId);
+        if (paymentData == null) {
+            return;
+        }
         Base64.Encoder encoder = Base64.getEncoder();
         paymentData.forEach((text, data) -> {
             byte[] encode = encoder.encode(("perId=1/payment=1/amount=2000" + data).getBytes(StandardCharsets.UTF_8));
@@ -89,7 +108,10 @@ public class AdminMessageServiceImpl implements AdminMessageService {
 
     private void sendClickPaymentLink(Long userId, String userLang) {
         String link = "https://click.uz/perId=1/payment=1/amount=2000";
-        Map<String, String> paymentData = responseText.getPaymentData(userLang, groupRepository.findByBotToken(sender.token).orElseThrow().getId(), userId);
+        Map<String, String> paymentData = responseText.getPaymentData(userLang, sender.getGroup().getId(), userId);
+        if (paymentData == null) {
+            return;
+        }
         paymentData.forEach((text, data) -> {
             paymentData.put(text, link + data);
         });
@@ -159,7 +181,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     private void changeLanguage(String text, Long userId, String userLang) {
         LangEnum lang = langService.getLanguageEnum(text);
 
-        Long botId = getBotId();
+        Long botId = sender.getGroup().getId();
         if (lang == null) {
             sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_LANGUAGE, userLang), responseButton.start(botId, userLang));
             return;
@@ -178,15 +200,13 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     }
 
     private void start(Long userId) {
-        long botId = getBotId();
+        long botId = sender.getGroup().getId();
+        ;
         String userLang = adminUtils.getUserLang(userId);
         String message = langService.getMessage(LangFields.HELLO, userLang);
         ReplyKeyboard start = responseButton.start(botId, userLang);
         sender.sendMessage(userId, message, start);
+        temp.clearTemp(userId);
     }
 
-    private Long getBotId() {
-        String botUsername = sender.getBotUsername();
-        return groupRepository.findByBotToken(sender.token).orElseThrow().getId();
-    }
 }

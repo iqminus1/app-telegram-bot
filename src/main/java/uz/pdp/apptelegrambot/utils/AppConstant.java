@@ -12,4 +12,14 @@ public interface AppConstant {
     String TARIFF_DATA = "tariffId:";
     String FILE_PATH = "C:\\Users\\User\\Desktop\\app-telegram-bot\\files";
     String LINK_NAME = "create by bot";
+    String BOT_DATA = "botId:";
+    //backToBotList
+    String BACK_TO_BOT_LIST_DATA = "backTBL";
+
+    //BBI -> by bot id
+    String TARIFF_LIST_DATA = "tariffLBBI:";
+    String ADD_TARIFF_DATA = "addTariffBBI:";
+    String CARD_NUMBER_DATA = "addCardNumberBBI:";
+    String GENERATE_CODE_DATA = "generateCodeBBI:";
+    String START_STOP_BOT_DATA = "startStopBotBBI:";
 }

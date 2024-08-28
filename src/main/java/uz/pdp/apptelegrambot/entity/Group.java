@@ -38,4 +38,6 @@ public class Group extends AbsLongEntity implements Serializable {
 
     private boolean screenShot;
 
+    private boolean worked;
+
 }

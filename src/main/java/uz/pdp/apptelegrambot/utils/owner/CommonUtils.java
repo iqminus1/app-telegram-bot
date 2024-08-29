@@ -37,10 +37,9 @@ public class CommonUtils {
         return user;
     }
 
-    public User setState(Long userId, StateEnum state) {
+    public void setState(Long userId, StateEnum state) {
         User user = getUser(userId);
         user.setState(state);
-        return user;
     }
 
     public String getUserLang(long userId) {

@@ -10,17 +10,21 @@ import uz.pdp.apptelegrambot.enums.ExpireType;
 import uz.pdp.apptelegrambot.enums.LangFields;
 import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 import uz.pdp.apptelegrambot.enums.StateEnum;
-import uz.pdp.apptelegrambot.repository.CodeGroupRepository;
-import uz.pdp.apptelegrambot.repository.GroupRepository;
-import uz.pdp.apptelegrambot.repository.ScreenshotGroupRepository;
-import uz.pdp.apptelegrambot.repository.TariffRepository;
+import uz.pdp.apptelegrambot.repository.*;
 import uz.pdp.apptelegrambot.service.LangService;
+import uz.pdp.apptelegrambot.service.admin.AdminController;
+import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
 import uz.pdp.apptelegrambot.service.owner.bot.OwnerSender;
 import uz.pdp.apptelegrambot.utils.AppConstant;
+import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+
+import static uz.pdp.apptelegrambot.utils.AppConstant.updateOrderExpire;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,8 @@ public class CallbackServiceImpl implements CallbackService {
     private final Random random;
     private final CodeGroupRepository codeGroupRepository;
     private final ScreenshotGroupRepository screenshotGroupRepository;
+    private final OrderRepository orderRepository;
+    private final AdminController adminController;
 
     @Override
     public void process(CallbackQuery callbackQuery) {
@@ -46,24 +52,30 @@ public class CallbackServiceImpl implements CallbackService {
             case START -> {
                 if (data.startsWith(AppConstant.BOT_DATA)) {
                     showBotInfo(callbackQuery);
-                } else if (data.equals(AppConstant.BACK_TO_BOT_LIST_DATA)) {
-                    backToList(callbackQuery);
                 } else if (data.startsWith(AppConstant.TARIFF_LIST_DATA)) {
                     showTariffList(callbackQuery);
-                } else if (data.equals(AppConstant.FREE_DATA)) {
-                    System.out.println("1");
-                } else if (data.startsWith(AppConstant.PAMYENT_MATHODS_DATA)) {
-
-                } else if (data.startsWith(AppConstant.BACK_TO_BOT_INFO_DATA)) {
-                    showBotInfo(callbackQuery);
-                } else if (data.startsWith(AppConstant.GENERATE_CODE_DATA)) {
-                    showTariffsForGenerateCode(callbackQuery);
-                } else if (data.startsWith(AppConstant.GENERATE_CODE_FOR_TARIFF_DATA)) {
-                    generateCode(callbackQuery);
                 } else if (data.startsWith(AppConstant.SEE_ALL_SCREENSHOTS)) {
                     showScreenshots(callbackQuery);
+                } else if (data.startsWith(AppConstant.GENERATE_CODE_FOR_TARIFF_DATA)) {
+                    generateCode(callbackQuery);
+                } else if (data.startsWith(AppConstant.ACCEPT_SCREENSHOT_DATA)) {
+                    acceptScreenshot(callbackQuery);
+                } else if (data.startsWith(AppConstant.REJECT_SCREENSHOT_DATA)) {
+                    rejectScreenshot(callbackQuery);
+                } else if (data.startsWith(AppConstant.PAMYENT_MATHODS_DATA)) {
+                    System.out.println(1);
+                } else if (data.startsWith(AppConstant.GENERATE_CODE_DATA)) {
+                    showTariffsForGenerateCode(callbackQuery);
                 } else if (data.startsWith(AppConstant.CARD_NUMBER_DATA)) {
                     addCardNumber(callbackQuery);
+                } else if (data.equals(AppConstant.FREE_DATA)) {
+                    System.out.println("1");
+                } else if (data.equals(AppConstant.BACK_TO_BOT_LIST_DATA)) {
+                    backToList(callbackQuery);
+                } else if (data.startsWith(AppConstant.BACK_TO_BOT_INFO_DATA)) {
+                    showBotInfo(callbackQuery);
+                } else if (data.startsWith(AppConstant.START_STOP_BOT_DATA)) {
+                    startStopBot(callbackQuery);
                 }
             }
             case SELECTING_TARIFF -> {
@@ -74,6 +86,69 @@ public class CallbackServiceImpl implements CallbackService {
                 }
             }
         }
+    }
+
+    private void rejectScreenshot(CallbackQuery callbackQuery) {
+        long userId = callbackQuery.getFrom().getId();
+        long screenshotId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        ScreenshotGroup screenshotGroup = updateScreenshot(screenshotId, ScreenshotStatus.REJECT);
+        String message = langService.getMessage(LangFields.REJECTED_SCREENSHOT_TEXT, userId);
+        sender.changeCaption(userId, callbackQuery.getMessage().getMessageId(), message);
+
+        AdminUtils adminUtils = adminController.getAdminUtils(userId);
+        AdminSender adminSender = adminController.getSenderByAdminId(userId);
+        Long sendUserId = screenshotGroup.getSendUserId();
+        String userLang = adminUtils.getUserLang(sendUserId);
+        String sendText = langService.getMessage(LangFields.SCREENSHOT_IS_INVALID_TEXT, userLang);
+        adminSender.sendMessage(screenshotGroup.getSendUserId(), sendText);
+    }
+
+    private void acceptScreenshot(CallbackQuery callbackQuery) {
+        long userId = callbackQuery.getFrom().getId();
+        long screenshotId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        ScreenshotGroup screenshotGroup = updateScreenshot(screenshotId, ScreenshotStatus.ACCEPT);
+        String message = langService.getMessage(LangFields.ACCEPTED_SCREENSHOT_TEXT, userId);
+        sender.changeCaption(userId, callbackQuery.getMessage().getMessageId(), message);
+        saveOrderAndSendLink(userId, screenshotGroup);
+
+    }
+
+    private void saveOrderAndSendLink(long userId, ScreenshotGroup screenshotGroup) {
+        AdminUtils adminUtils = adminController.getAdminUtils(userId);
+        AdminSender adminSender = adminController.getSenderByAdminId(userId);
+        Long sendUserId = screenshotGroup.getSendUserId();
+        String userLang = adminUtils.getUserLang(sendUserId);
+        Optional<Order> optionalOrder = orderRepository.findByUserIdAndGroupId(sendUserId, screenshotGroup.getGroupId());
+        if (optionalOrder.isPresent()) {
+            Order order = updateOrderExpire(optionalOrder.get(), screenshotGroup.getType());
+            orderRepository.save(order);
+            String message = langService.getMessage(LangFields.SCREENSHOT_IS_VALID_TEXT, userLang) + adminSender.getLink(screenshotGroup.getGroupId());
+            adminSender.sendMessage(sendUserId, message);
+            return;
+        }
+        Order order = updateOrderExpire(new Order(), screenshotGroup.getType());
+        order.setUserId(sendUserId);
+        order.setGroupId(screenshotGroup.getGroupId());
+        orderRepository.save(order);
+        String message = langService.getMessage(LangFields.SCREENSHOT_IS_VALID_TEXT, userLang) + " -> " + adminSender.getLink(screenshotGroup.getGroupId());
+        adminSender.sendMessage(sendUserId, message);
+    }
+
+    private ScreenshotGroup updateScreenshot(long id, ScreenshotStatus status) {
+        ScreenshotGroup screenshotGroup = screenshotGroupRepository.findById(id).orElseThrow();
+        screenshotGroup.setStatus(status);
+        screenshotGroup.setActiveAt(LocalDateTime.now());
+        screenshotGroupRepository.saveOptional(screenshotGroup);
+        return screenshotGroup;
+    }
+
+
+    private void startStopBot(CallbackQuery callbackQuery) {
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Group group = groupRepository.findById(botId).orElseThrow();
+        group.setWorked(!group.isWorked());
+        groupRepository.saveOptional(group);
+        showBotInfo(callbackQuery);
     }
 
     private void addCardNumber(CallbackQuery callbackQuery) {
@@ -100,7 +175,9 @@ public class CallbackServiceImpl implements CallbackService {
         for (ScreenshotGroup screenshot : screenshots) {
             Long screenshotId = screenshot.getId();
             InlineKeyboardMarkup keyboard = responseButton.screenshotsKeyboard(userId, screenshotId);
-            String message = langService.getMessage(LangFields.UN_CHECKED_SCREENSHOT_TEXT, userId);
+            String message = langService.getMessage(LangFields.UN_CHECKED_SCREENSHOT_TEXT, userId)
+                    .formatted(responseText.getTariffExpireText(screenshot.getType().ordinal(),
+                            commonUtils.getUserLang(userId)), screenshot.getTariffPrice());
             sender.sendPhoto(userId, message, screenshot.getPath(), keyboard);
         }
     }

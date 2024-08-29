@@ -9,13 +9,13 @@ import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminBot;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
-import uz.pdp.apptelegrambot.service.admin.sceduled.AdminResponseText;
 import uz.pdp.apptelegrambot.service.owner.ResponseText;
 import uz.pdp.apptelegrambot.service.owner.Temp;
 import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -32,15 +32,18 @@ public class AdminController {
     private final CodeGroupRepository codeGroupRepository;
     private final AdminResponseText adminResponseText;
     private final ScreenshotGroupRepository screenshotGroupRepository;
+    private final Random random;
     Map<Long, AdminSender> adminSender = new ConcurrentHashMap<>();
+    Map<Long, AdminUtils> adminUtils = new ConcurrentHashMap<>();
 
 
     public void addAdminBot(String token, Long adminId) {
-        AdminSender sender = new AdminSender(token, groupRepository);
+        AdminSender sender = new AdminSender(token, groupRepository, random);
         adminSender.put(adminId, sender);
         setBotToken(sender, adminId);
         AdminTemp adminTemp = new AdminTemp();
         AdminUtils adminUtils = new AdminUtils(userLangRepository);
+        this.adminUtils.put(adminId, adminUtils);
         MyChatMemberService myChatMemberService = new MyChatMemberServiceImpl(groupRepository, sender);
         AdminResponseButton adminResponseButton = new AdminResponseButton(buttonService, groupRepository, langService, tariffRepository, responseText);
         AdminMessageServiceImpl adminMessageService = new AdminMessageServiceImpl(sender, langService, adminUtils, adminResponseButton, groupRepository, buttonService, codeGroupRepository, orderRepository, adminResponseText, adminTemp, screenshotGroupRepository, token);
@@ -70,5 +73,9 @@ public class AdminController {
             return adminSender.get(adminId);
         }
         return null;
+    }
+
+    public AdminUtils getAdminUtils(long adminId) {
+        return adminUtils.get(adminId);
     }
 }

@@ -1,4 +1,4 @@
-package uz.pdp.apptelegrambot.service.admin.sceduled;
+package uz.pdp.apptelegrambot.service.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

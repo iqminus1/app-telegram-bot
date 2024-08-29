@@ -1,5 +1,10 @@
 package uz.pdp.apptelegrambot.utils;
 
+import uz.pdp.apptelegrambot.entity.Order;
+import uz.pdp.apptelegrambot.enums.ExpireType;
+
+import java.time.LocalDateTime;
+
 public interface AppConstant {
     String TOKEN = "7526831468:AAFTZllAKdDJEhih22K-gcyUja4Da_pE_54";
     String USERNAME = "manager_group_father_bot";
@@ -29,4 +34,23 @@ public interface AppConstant {
     String PAMYENT_MATHODS_DATA = "paymentMethodsBBI:";
     String BACK_TO_BOT_INFO_DATA = "backToBotInfoBBI:";
     String SEE_ALL_SCREENSHOTS = "seeAllScreenshotsBBI:";
+
+    static Order updateOrderExpire(Order order, ExpireType type) {
+        if (order.getExpireDay() == null) {
+            order.setExpireDay(LocalDateTime.now());
+        }
+        if (type == ExpireType.WEEK)
+            order.setExpireDay(order.getExpireDay().plusWeeks(1));
+        if (type == ExpireType.DAY_15)
+            order.setExpireDay(order.getExpireDay().plusDays(15));
+        if (type == ExpireType.MONTH)
+            order.setExpireDay(order.getExpireDay().plusMonths(1));
+        if (type == ExpireType.YEAR)
+            order.setExpireDay(order.getExpireDay().plusYears(1));
+        if (type == ExpireType.UNLIMITED) {
+            order.setExpireDay(LocalDateTime.now().plusYears(100));
+            order.setUnlimited(true);
+        }
+        return order;
+    }
 }

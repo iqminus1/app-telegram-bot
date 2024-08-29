@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -34,11 +35,13 @@ public class AdminSender extends DefaultAbsSender {
     private String username = null;
     public final String token;
     private final GroupRepository groupRepository;
+    private final Random random;
 
-    public AdminSender(String token, GroupRepository groupRepository) {
+    public AdminSender(String token, GroupRepository groupRepository, Random random) {
         super(new DefaultBotOptions(), token);
         this.token = token;
         this.groupRepository = groupRepository;
+        this.random = random;
     }
 
     @Async
@@ -177,8 +180,7 @@ public class AdminSender extends DefaultAbsSender {
         CreateChatInviteLink createChatInviteLink = new CreateChatInviteLink();
         createChatInviteLink.setChatId(groupId);
         createChatInviteLink.setCreatesJoinRequest(true);
-        createChatInviteLink.setName(AppConstant.LINK_NAME);
-        createChatInviteLink.setExpireDate(2);
+        createChatInviteLink.setName(UUID.randomUUID().toString().substring(random.nextInt(1, 7), random.nextInt(10, 32)));
         ChatInviteLink execute = execute(createChatInviteLink);
         return execute.getInviteLink();
     }

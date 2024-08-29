@@ -46,11 +46,11 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     @Override
     public void process(Message message) {
         if (message.getChat().getType().equals("private")) {
+            Long userId = message.getChat().getId();
+            String userLang = adminUtils.getUserLang(userId);
+            StateEnum state = adminUtils.getUserState(userId);
             if (message.hasText()) {
                 String text = message.getText();
-                Long userId = message.getChat().getId();
-                String userLang = adminUtils.getUserLang(userId);
-                StateEnum state = adminUtils.getUserState(userId);
                 if (text.equals("/start")) {
                     start(userId);
                     return;
@@ -77,19 +77,26 @@ public class AdminMessageServiceImpl implements AdminMessageService {
 
 
             } else if (message.hasPhoto()) {
-                Long userId = message.getFrom().getId();
-                ScreenshotGroup tempScreenshot = temp.getTempScreenshot(userId);
-                List<PhotoSize> photo = message.getPhoto();
-                PhotoSize photoSize = photo.stream().max(Comparator.comparing(PhotoSize::getFileSize)).get();
-                String filePath = sender.getFilePath(photoSize);
-                tempScreenshot.setPath(filePath);
-
-                screenshotGroupRepository.saveOptional(tempScreenshot);
-
-                adminUtils.setUserState(userId, StateEnum.START);
-                sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_GETTING_SCREENSHOT_TEXT, adminUtils.getUserLang(userId)), null);
+                if (state.equals(StateEnum.SENDING_JOIN_REQ_SCREENSHOT)) {
+                    savePhoto(message);
+                }
             }
         }
+    }
+
+    private void savePhoto(Message message) {
+        Long userId = message.getFrom().getId();
+        ScreenshotGroup tempScreenshot = temp.getTempScreenshot(userId);
+        List<PhotoSize> photo = message.getPhoto();
+        PhotoSize photoSize = photo.stream().max(Comparator.comparing(PhotoSize::getFileSize)).get();
+        String filePath = sender.getFilePath(photoSize);
+        tempScreenshot.setPath(filePath);
+
+        screenshotGroupRepository.saveOptional(tempScreenshot);
+        temp.clearTemp(userId);
+        adminUtils.setUserState(userId, StateEnum.START);
+        sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_GETTING_SCREENSHOT_TEXT, adminUtils.getUserLang(userId)), null);
+
     }
 
     private void sendPaymePaymentLink(Long userId, String userLang) {

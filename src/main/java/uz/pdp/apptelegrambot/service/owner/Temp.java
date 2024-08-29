@@ -14,10 +14,12 @@ import java.util.stream.Collectors;
 public class Temp {
     private final ConcurrentMap<Long, Group> tempGroup = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long, List<Tariff>> tempTariffs = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, Long> tempBotId = new ConcurrentHashMap<>();
 
     public void clearTemp(Long userId) {
         tempGroup.remove(userId);
         tempTariffs.remove(userId);
+        tempBotId.remove(userId);
     }
 
     public void addTempGroup(Group group) {
@@ -25,7 +27,7 @@ public class Temp {
     }
 
     public Group getTempGroup(Long userId) {
-        return tempGroup.get(userId); // Можно упростить, так как get() возвращает null, если ключ не найден
+        return tempGroup.get(userId);
     }
 
     public void addTempTariff(Long userId, Tariff tariff) {
@@ -39,15 +41,20 @@ public class Temp {
     }
 
     public List<Tariff> getTempTariffs(Long userId) {
-        return tempTariffs.getOrDefault(userId, new ArrayList<>()); // Упрощенный код для возврата значения по умолчанию
+        return tempTariffs.getOrDefault(userId, new ArrayList<>());
     }
 
     public void removeTempTariff(Integer ordinal, Long userId) {
-        tempTariffs.computeIfPresent(userId, (key, tariffs) -> {
-            List<Tariff> filteredTariffs = tariffs.stream()
-                    .filter(t -> t.getType().ordinal() != ordinal)
-                    .collect(Collectors.toList());
-            return filteredTariffs;
-        });
+        tempTariffs.computeIfPresent(userId, (key, tariffs) -> tariffs.stream()
+                .filter(t -> t.getType().ordinal() != ordinal)
+                .collect(Collectors.toList()));
+    }
+
+    public void addTempBotId(long userId, long botId) {
+        tempBotId.put(userId, botId);
+    }
+
+    public long getTempBotId(long userId) {
+        return tempBotId.get(userId);
     }
 }

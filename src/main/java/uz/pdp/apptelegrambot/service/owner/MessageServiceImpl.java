@@ -63,6 +63,8 @@ public class MessageServiceImpl implements MessageService {
                     case SELECT_LANGUAGE -> changeLanguage(text, userId);
                     case SENDING_BOT_TOKEN -> setToken(text, userId);
                     case SENDING_TARIFF_PRICE -> setTariffPrice(message);
+                    case SENDING_CARD_NUMBER -> checkCardNumber(message);
+                    case SENDING_CARD_NAME -> setCardName(message);
                     default ->
                             sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, userId), responseButton.start(userId));
 
@@ -76,6 +78,41 @@ public class MessageServiceImpl implements MessageService {
                 }
             }
         }
+    }
+
+    private void setCardName(Message message) {
+        String text = message.getText();
+        Long userId = message.getFrom().getId();
+        Group tempGroup = temp.getTempGroup(userId);
+        tempGroup.setCardName(text);
+        groupRepository.saveOptional(tempGroup);
+        commonUtils.setState(userId, StateEnum.START);
+        String sendText = langService.getMessage(LangFields.BOT_INFO_TEXT, userId).formatted(tempGroup.getBotUsername(), tempGroup.getName());
+        sender.sendMessage(userId, sendText, responseButton.botInfo(temp.getTempBotId(userId), userId));
+        temp.clearTemp(userId);
+    }
+
+    private void checkCardNumber(Message message) {
+        String text = message.getText();
+        Long userId = message.getFrom().getId();
+        Group tempGroup = temp.getTempGroup(userId);
+        if (text.matches("\\d{16}")) { // Формат без пробелов
+            String formattedCardNumber = text.substring(0, 4) + " " +
+                    text.substring(4, 8) + " " +
+                    text.substring(8, 12) + " " +
+                    text.substring(12);
+
+            tempGroup.setCardNumber(formattedCardNumber);
+            commonUtils.setState(userId, StateEnum.SENDING_CARD_NAME);
+            sender.sendMessage(userId, langService.getMessage(LangFields.SEND_CARD_NAME_TEXT, userId));
+            return;
+        } else if (text.matches("\\d{4} \\d{4} \\d{4} \\d{4}")) {
+            tempGroup.setCardNumber(text);
+            commonUtils.setState(userId, StateEnum.SENDING_CARD_NAME);
+            sender.sendMessage(userId, langService.getMessage(LangFields.SEND_CARD_NAME_TEXT, userId));
+            return;
+        }
+        sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_CARD_NUMBER_TEXT, userId));
     }
 
     private void sendListBots(Long userId) {

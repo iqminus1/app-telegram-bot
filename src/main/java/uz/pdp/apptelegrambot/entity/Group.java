@@ -32,7 +32,9 @@ public class Group extends AbsLongEntity implements Serializable {
 
     private boolean allowPayment;
 
-    private boolean payment;
+    private boolean payme;
+
+    private boolean click;
 
     private boolean code;
 

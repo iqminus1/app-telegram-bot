@@ -34,6 +34,10 @@ public interface AppConstant {
     String PAMYENT_MATHODS_DATA = "paymentMethodsBBI:";
     String BACK_TO_BOT_INFO_DATA = "backToBotInfoBBI:";
     String SEE_ALL_SCREENSHOTS = "seeAllScreenshotsBBI:";
+    String CHANGE_CLICK_STATUS_DATA = "changeClickStatusBBI:";
+    String CHANGE_PAYME_STATUS_DATA = "changePamyeStatusBBI:";
+    String CHANGE_SCREENSHOT_STATUS_DATA = "changeScreenshotStatusBBI:";
+    String CHANGE_CODE_STATUS_DATA = "changeCodeStatusBBI:";
 
     static Order updateOrderExpire(Order order, ExpireType type) {
         if (order.getExpireDay() == null) {

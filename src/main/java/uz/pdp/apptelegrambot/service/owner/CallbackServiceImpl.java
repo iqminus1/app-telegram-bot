@@ -63,13 +63,21 @@ public class CallbackServiceImpl implements CallbackService {
                 } else if (data.startsWith(AppConstant.REJECT_SCREENSHOT_DATA)) {
                     rejectScreenshot(callbackQuery);
                 } else if (data.startsWith(AppConstant.PAMYENT_MATHODS_DATA)) {
-                    System.out.println(1);
+                    showPaymentsInfo(callbackQuery);
                 } else if (data.startsWith(AppConstant.GENERATE_CODE_DATA)) {
                     showTariffsForGenerateCode(callbackQuery);
                 } else if (data.startsWith(AppConstant.CARD_NUMBER_DATA)) {
                     addCardNumber(callbackQuery);
                 } else if (data.equals(AppConstant.FREE_DATA)) {
                     System.out.println("1");
+                } else if (data.startsWith(AppConstant.CHANGE_CLICK_STATUS_DATA)) {
+                    changeStatusClick(callbackQuery);
+                } else if (data.startsWith(AppConstant.CHANGE_PAYME_STATUS_DATA)) {
+                    changeStatusPayme(callbackQuery);
+                } else if (data.startsWith(AppConstant.CHANGE_SCREENSHOT_STATUS_DATA)) {
+                    changeStatusScreenshot(callbackQuery);
+                } else if (data.startsWith(AppConstant.CHANGE_CODE_STATUS_DATA)) {
+                    changeStatusCode(callbackQuery);
                 } else if (data.equals(AppConstant.BACK_TO_BOT_LIST_DATA)) {
                     backToList(callbackQuery);
                 } else if (data.startsWith(AppConstant.BACK_TO_BOT_INFO_DATA)) {
@@ -86,6 +94,60 @@ public class CallbackServiceImpl implements CallbackService {
                 }
             }
         }
+    }
+
+    private void changeStatusClick(CallbackQuery callbackQuery) {
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Group group = groupRepository.findById(botId).orElseThrow();
+        if (group.isAllowPayment()) {
+            group.setClick(!group.isClick());
+            groupRepository.saveOptional(group);
+            showPaymentsInfo(callbackQuery);
+            return;
+        }
+        Long userId = callbackQuery.getFrom().getId();
+        sender.sendMessage(userId, langService.getMessage(LangFields.NOT_ALLOWED_PAYMENT_TEXT, userId));
+
+    }
+
+    private void changeStatusPayme(CallbackQuery callbackQuery) {
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Group group = groupRepository.findById(botId).orElseThrow();
+        if (group.isAllowPayment()) {
+            group.setPayme(!group.isPayme());
+            groupRepository.saveOptional(group);
+            showPaymentsInfo(callbackQuery);
+            return;
+        }
+        Long userId = callbackQuery.getFrom().getId();
+        sender.sendMessage(userId, langService.getMessage(LangFields.NOT_ALLOWED_PAYMENT_TEXT, userId));
+
+    }
+
+    private void changeStatusScreenshot(CallbackQuery callbackQuery) {
+
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Group group = groupRepository.findById(botId).orElseThrow();
+        group.setScreenShot(!group.isScreenShot());
+        groupRepository.saveOptional(group);
+        showPaymentsInfo(callbackQuery);
+    }
+
+    private void changeStatusCode(CallbackQuery callbackQuery) {
+
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Group group = groupRepository.findById(botId).orElseThrow();
+        group.setCode(!group.isCode());
+        groupRepository.saveOptional(group);
+        showPaymentsInfo(callbackQuery);
+    }
+
+    private void showPaymentsInfo(CallbackQuery callbackQuery) {
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Long userId = callbackQuery.getFrom().getId();
+        InlineKeyboardMarkup markup = responseButton.showGroupPayments(userId, botId);
+        String message = langService.getMessage(LangFields.PAYMENTS_LIST_TEXT, userId);
+        sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), message, markup);
     }
 
     private void rejectScreenshot(CallbackQuery callbackQuery) {
@@ -185,6 +247,10 @@ public class CallbackServiceImpl implements CallbackService {
     private void generateCode(CallbackQuery callbackQuery) {
         long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Tariff tariff = tariffRepository.findById(tariffId).orElseThrow();
+        Group group = groupRepository.findById(tariff.getBotId()).orElseThrow();
+        if (!group.isCode()) {
+            return;
+        }
         Long userId = callbackQuery.getFrom().getId();
         CodeGroup codeGroup = new CodeGroup(generateCode(), tariff.getBotId(), null, tariff.getType(), false, null, tariffId, tariff.getPrice());
         codeGroupRepository.saveOptional(codeGroup);

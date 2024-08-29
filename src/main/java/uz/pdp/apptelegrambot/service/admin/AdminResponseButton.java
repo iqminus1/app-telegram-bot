@@ -34,10 +34,11 @@ public class AdminResponseButton {
     public ReplyKeyboard start(Long botId, String lang) {
         Group group = groupRepository.findById(botId).orElseThrow();
         List<String> list = new ArrayList<>();
-        if (group.isPayment()) {
+        if (group.isClick()) {
             list.add(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_CLICK_TEXT, lang));
-            list.add(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_PAYME_TEXT, lang));
         }
+        if (group.isPayme())
+            list.add(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_PAYME_TEXT, lang));
         if (group.isScreenShot()) {
             list.add(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_SCREENSHOT_TEXT, lang));
         }

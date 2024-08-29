@@ -154,4 +154,35 @@ public class ResponseButton {
         list.add(map);
         return buttonService.callbackKeyboard(list);
     }
+
+    public InlineKeyboardMarkup showGroupPayments(Long userId, long botId) {
+        Group group = groupRepository.findById(botId).orElseThrow();
+        List<Map<String, String>> list = new ArrayList<>();
+        String clickText = langService.getMessage(LangFields.STOP_PAYMENT_CLICK_TEXT, userId);
+        if (!group.isClick()) {
+            clickText = langService.getMessage(LangFields.START_PAYMENT_CLICK_TEXT, userId);
+        }
+        list.add(Map.of(clickText, AppConstant.CHANGE_CLICK_STATUS_DATA + botId));
+
+        String paymeText = langService.getMessage(LangFields.STOP_PAYMENT_PAYME_TEXT, userId);
+        if (!group.isClick()) {
+            paymeText = langService.getMessage(LangFields.START_PAYMENT_PAYME_TEXT, userId);
+        }
+        list.add(Map.of(paymeText, AppConstant.CHANGE_PAYME_STATUS_DATA + botId));
+
+        String screenshotText = langService.getMessage(LangFields.STOP_PAYMENT_SCREENSHOT_TEXT, userId);
+        if (!group.isScreenShot()) {
+            screenshotText = langService.getMessage(LangFields.START_PAYMENT_SCEEENSHOT_TEXT, userId);
+        }
+        list.add(Map.of(screenshotText, AppConstant.CHANGE_SCREENSHOT_STATUS_DATA + botId));
+
+        String codeText = langService.getMessage(LangFields.STOP_PAYMENT_CODE_TEXT, userId);
+        if (!group.isCode()) {
+            codeText = langService.getMessage(LangFields.START_PAYMENT_CODE_TEXT, userId);
+        }
+        list.add(Map.of(codeText, AppConstant.CHANGE_CODE_STATUS_DATA + botId));
+
+        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userId), AppConstant.BACK_TO_BOT_INFO_DATA + botId));
+        return buttonService.callbackKeyboard(list);
+    }
 }

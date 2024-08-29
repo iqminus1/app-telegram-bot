@@ -9,7 +9,6 @@ import uz.pdp.apptelegrambot.entity.CodeGroup;
 import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.Order;
 import uz.pdp.apptelegrambot.entity.ScreenshotGroup;
-import uz.pdp.apptelegrambot.enums.ExpireType;
 import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
 import uz.pdp.apptelegrambot.enums.StateEnum;
@@ -20,13 +19,14 @@ import uz.pdp.apptelegrambot.repository.ScreenshotGroupRepository;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
-import uz.pdp.apptelegrambot.service.admin.sceduled.AdminResponseText;
 import uz.pdp.apptelegrambot.utils.AppConstant;
 import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
+
+import static uz.pdp.apptelegrambot.utils.AppConstant.updateOrderExpire;
 
 @RequiredArgsConstructor
 public class AdminMessageServiceImpl implements AdminMessageService {
@@ -66,7 +66,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                         } else if (text.equals(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_CODE_TEXT, userLang))) {
                             sendCodeText(userId, userLang);
                         } else if (text.equals(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_SCREENSHOT_TEXT, userLang))) {
-                            checkAndSendTariffs(userId, userLang, AppConstant.SCREENSHOT);
+                            checkAndSendTariffs(userId, userLang);
                         }
                     }
                     case SELECT_LANGUAGE -> changeLanguage(text, userId, userLang);
@@ -119,9 +119,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         if (paymentData == null) {
             return;
         }
-        paymentData.forEach((text, data) -> {
-            paymentData.put(text, link + data);
-        });
+        paymentData.forEach((text, data) -> paymentData.put(text, link + data));
         sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_CHOOSE_TARIFF_FOR_JOIN_TEXT, userLang), responseButton.callbackWithLink(paymentData));
     }
 
@@ -145,13 +143,13 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         codeGroupRepository.saveOptional(codeGroup);
         Optional<Order> optionalOrder = orderRepository.findByUserIdAndGroupId(userId, group.getGroupId());
         if (optionalOrder.isPresent()) {
-            Order order = updateOrderExpire(optionalOrder.get(), codeGroup);
+            Order order = updateOrderExpire(optionalOrder.get(), codeGroup.getType());
             orderRepository.save(order);
             adminUtils.setUserState(userId, StateEnum.START);
             sender.sendMessage(userId, langService.getMessage(LangFields.JOIN_REQ_CODE_VALID_TEXT, userLang) + " -> " + sender.getLink(group.getGroupId()), responseButton.start(group.getId(), userLang));
             return;
         }
-        Order order = updateOrderExpire(new Order(), codeGroup);
+        Order order = updateOrderExpire(new Order(), codeGroup.getType());
         order.setUserId(userId);
         order.setGroupId(group.getGroupId());
         orderRepository.save(order);
@@ -159,38 +157,18 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         sender.sendMessage(userId, langService.getMessage(LangFields.JOIN_REQ_CODE_VALID_TEXT, userLang) + " -> " + sender.getLink(group.getGroupId()), responseButton.start(group.getId(), userLang));
     }
 
-    private static Order updateOrderExpire(Order order, CodeGroup codeGroup) {
-        ExpireType type = codeGroup.getType();
-        if (order.getExpireDay() == null) {
-            order.setExpireDay(LocalDateTime.now());
-        }
-        if (type == ExpireType.WEEK)
-            order.setExpireDay(order.getExpireDay().plusWeeks(1));
-        if (type == ExpireType.DAY_15)
-            order.setExpireDay(order.getExpireDay().plusDays(15));
-        if (type == ExpireType.MONTH)
-            order.setExpireDay(order.getExpireDay().plusMonths(1));
-        if (type == ExpireType.YEAR)
-            order.setExpireDay(order.getExpireDay().plusYears(1));
-        if (type == ExpireType.UNLIMITED) {
-            order.setExpireDay(LocalDateTime.now().plusYears(100));
-            order.setUnlimited(true);
-        }
-        return order;
-    }
 
     private void sendCodeText(Long userId, String userLang) {
         adminUtils.setUserState(userId, StateEnum.SENDING_JOIN_REQ_CODE);
         sender.sendMessageAndRemove(userId, langService.getMessage(LangFields.SEND_CODE_FOR_JOIN_REQ_TEXT, userLang));
     }
 
-    private void checkAndSendTariffs(Long userId, String userLang, String data) {
+    private void checkAndSendTariffs(Long userId, String userLang) {
         Group group = groupRepository.findByBotToken(token).orElseThrow();
         if (!group.isScreenShot())
             return;
 
-
-        InlineKeyboardMarkup markup = responseButton.tariffList(group.getId(), data, userLang);
+        InlineKeyboardMarkup markup = responseButton.tariffList(group.getId(), AppConstant.SCREENSHOT, userLang);
         sender.deleteKeyboard(userId);
         sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_CHOOSE_TARIFF_FOR_JOIN_TEXT, userLang), markup);
     }
@@ -218,7 +196,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
 
     private void start(Long userId) {
         long botId = sender.getGroup().getId();
-        ;
+        adminUtils.setUserState(userId, StateEnum.START);
         String userLang = adminUtils.getUserLang(userId);
         String message = langService.getMessage(LangFields.HELLO, userLang);
         ReplyKeyboard start = responseButton.start(botId, userLang);

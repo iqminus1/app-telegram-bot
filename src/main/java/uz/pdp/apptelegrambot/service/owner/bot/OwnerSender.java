@@ -7,6 +7,7 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -42,17 +43,6 @@ public class OwnerSender extends DefaultAbsSender {
         sendMessage(userId, text, new ReplyKeyboardRemove(true));
     }
 
-    @Async
-    public void autoRemoveKeyboard(Long userId) {
-        try {
-            SendMessage sendMessage = new SendMessage(userId.toString(), ".");
-            sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
-            Message message = execute(sendMessage);
-            deleteMessage(userId, message.getMessageId());
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public void deleteMessage(Long userId, Integer messageId) {
         try {
@@ -84,5 +74,17 @@ public class OwnerSender extends DefaultAbsSender {
         sendPhoto.setChatId(userId);
         sendPhoto.setReplyMarkup(keyboard);
         executeAsync(sendPhoto);
+    }
+
+    public void changeCaption(Long userId, Integer messageId, String text) {
+        EditMessageCaption editMessageCaption = new EditMessageCaption();
+        editMessageCaption.setChatId(userId);
+        editMessageCaption.setCaption(text);
+        editMessageCaption.setMessageId(messageId);
+        try {
+            execute(editMessageCaption);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

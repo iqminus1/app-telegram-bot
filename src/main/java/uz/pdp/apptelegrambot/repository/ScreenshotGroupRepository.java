@@ -9,20 +9,21 @@ import uz.pdp.apptelegrambot.entity.ScreenshotGroup;
 import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ScreenshotGroupRepository extends JpaRepository<ScreenshotGroup, Long> {
+
     @Cacheable(value = "screenshotGroupEntity", key = "#id")
-    @Override
-    Optional<ScreenshotGroup> findById(Long id);
+    default ScreenshotGroup getById(Long id) {
+        return findById(id).orElseThrow();
+    }
 
     @Cacheable(value = "findAll", key = "#groupId")
     List<ScreenshotGroup> findAllByGroupIdAndStatus(Long groupId, ScreenshotStatus status);
 
     @CacheEvict(value = "findAll", key = "#screenshotGroup.groupId")
-    @CachePut(value = "screenshotGroupEntity", key = "#screenshotGroup.id")
-    default Optional<ScreenshotGroup> saveOptional(ScreenshotGroup screenshotGroup) {
-        return Optional.of(save(screenshotGroup));
+    @CachePut(value = "screenshotGroupEntity", key = "#result.id")
+    default ScreenshotGroup saveOptional(ScreenshotGroup screenshotGroup) {
+        return save(screenshotGroup);
     }
 }

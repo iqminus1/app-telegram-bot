@@ -32,26 +32,24 @@ public class ResponseButton {
     private final ResponseText responseText;
     private final CommonUtils commonUtils;
 
-    @Cacheable(value = "responseButtonStart", key = "#userId")
-    public ReplyKeyboard start(long userId) {
+    public ReplyKeyboard start(String lang) {
         List<String> list = new ArrayList<>();
 
-        list.add(langService.getMessage(LangFields.BUTTON_ADD_BOT, userId));
+        list.add(langService.getMessage(LangFields.BUTTON_ADD_BOT, lang));
 
-        list.add(langService.getMessage(LangFields.BUTTON_MY_BOTS, userId));
+        list.add(langService.getMessage(LangFields.BUTTON_MY_BOTS, lang));
 
-        list.add(langService.getMessage(LangFields.BUTTON_LANG_SETTINGS, userId));
+        list.add(langService.getMessage(LangFields.BUTTON_LANG_SETTINGS, lang));
 
-        list.add(langService.getMessage(LangFields.BUTTON_CONTACT_US, userId));
+        list.add(langService.getMessage(LangFields.BUTTON_CONTACT_US, lang));
 
         return buttonService.withString(list);
     }
 
-    @Cacheable(value = "responseButtonContactNumber", key = "commonUtils.getUserLang(#userId)")
-    public ReplyKeyboard contactNumber(Long userId) {
+    public ReplyKeyboard contactNumber(String lang) {
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         markup.setResizeKeyboard(true);
-        KeyboardButton keyboardButton = new KeyboardButton(langService.getMessage(LangFields.BUTTON_SEND_CONTACT_NUMBER, userId));
+        KeyboardButton keyboardButton = new KeyboardButton(langService.getMessage(LangFields.BUTTON_SEND_CONTACT_NUMBER, lang));
         keyboardButton.setRequestContact(true);
         KeyboardRow row = new KeyboardRow();
         row.add(keyboardButton);
@@ -61,43 +59,44 @@ public class ResponseButton {
 
     public InlineKeyboardMarkup tariffList(Long botId, Long userId) {
         List<Tariff> tariffs = temp.getTempTariffs(userId);
+        String userLang = commonUtils.getUserLang(userId);
         List<Integer> ordinals = tariffs.stream().map(Tariff::getType).map(ExpireType::ordinal).toList();
         List<Map<String, String>> list = new ArrayList<>();
-        String week = langService.getMessage(LangFields.TARIFF_WEEK_TEXT, userId);
+        String week = langService.getMessage(LangFields.TARIFF_WEEK_TEXT, userLang);
         if (!ordinals.contains(0)) {
             list.add(Map.of(week, AppConstant.TARIFF_SELECTING_DATA + botId + "+0:false"));
         } else {
             list.add(Map.of(week + AppConstant.GREEN_TEXT, AppConstant.TARIFF_SELECTING_DATA + botId + "+0:true"));
         }
-        String day15 = langService.getMessage(LangFields.TARIFF_15_DAY_TEXT, userId);
+        String day15 = langService.getMessage(LangFields.TARIFF_15_DAY_TEXT, userLang);
         if (!ordinals.contains(1)) {
             list.add(Map.of(day15, AppConstant.TARIFF_SELECTING_DATA + botId + "+1:false"));
         } else {
             list.add(Map.of(day15 + AppConstant.GREEN_TEXT, AppConstant.TARIFF_SELECTING_DATA + botId + "+1:true"));
         }
 
-        String month = langService.getMessage(LangFields.TARIFF_MONTH_TEXT, userId);
+        String month = langService.getMessage(LangFields.TARIFF_MONTH_TEXT, userLang);
         if (!ordinals.contains(2)) {
             list.add(Map.of(month, AppConstant.TARIFF_SELECTING_DATA + botId + "+2:false"));
         } else {
             list.add(Map.of(month + AppConstant.GREEN_TEXT, AppConstant.TARIFF_SELECTING_DATA + botId + "+2:true"));
         }
 
-        String year = langService.getMessage(LangFields.TARIFF_YEAR_TEXT, userId);
+        String year = langService.getMessage(LangFields.TARIFF_YEAR_TEXT, userLang);
         if (!ordinals.contains(3)) {
             list.add(Map.of(year, AppConstant.TARIFF_SELECTING_DATA + botId + "+3:false"));
         } else {
             list.add(Map.of(year + AppConstant.GREEN_TEXT, AppConstant.TARIFF_SELECTING_DATA + botId + "+3:true"));
         }
 
-        String unlimited = langService.getMessage(LangFields.TARIFF_UNLIMITED_TEXT, userId);
+        String unlimited = langService.getMessage(LangFields.TARIFF_UNLIMITED_TEXT, userLang);
         if (!ordinals.contains(4)) {
             list.add(Map.of(unlimited, AppConstant.TARIFF_SELECTING_DATA + botId + "+4:false"));
         } else {
             list.add(Map.of(unlimited + AppConstant.GREEN_TEXT, AppConstant.TARIFF_SELECTING_DATA + botId + "+4:true"));
         }
 
-        list.add(Map.of(langService.getMessage(LangFields.ACCEPT_TARIFFS_TEXT, userId), AppConstant.ACCEPT_TARIFFS_DATA));
+        list.add(Map.of(langService.getMessage(LangFields.ACCEPT_TARIFFS_TEXT, userLang), AppConstant.ACCEPT_TARIFFS_DATA));
 
         return buttonService.callbackKeyboard(list);
     }
@@ -111,21 +110,21 @@ public class ResponseButton {
         return buttonService.callbackKeyboard(list);
     }
 
-    public InlineKeyboardMarkup botInfo(long botId, long userId) {
+    public InlineKeyboardMarkup botInfo(long botId, String userLang) {
         List<Map<String, String>> list = new ArrayList<>();
 
-        list.add(Map.of(langService.getMessage(LangFields.TARIFF_LIST_TEXT, userId), AppConstant.TARIFF_LIST_DATA + botId));
-        list.add(Map.of(langService.getMessage(LangFields.PAYMENT_METHODS_TEXT, userId), AppConstant.PAMYENT_MATHODS_DATA + botId));
-        list.add(Map.of(langService.getMessage(LangFields.CARD_NUMBER_TEXT, userId), AppConstant.CARD_NUMBER_DATA + botId));
-        list.add(Map.of(langService.getMessage(LangFields.GENERATE_CODE_TEXT, userId), AppConstant.GENERATE_CODE_DATA + botId));
-        list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SCREENSHOTS, userId), AppConstant.SEE_ALL_SCREENSHOTS + botId));
-        Group group = groupRepository.findById(botId).orElseThrow();
+        list.add(Map.of(langService.getMessage(LangFields.TARIFF_LIST_TEXT, userLang), AppConstant.TARIFF_LIST_DATA + botId));
+        list.add(Map.of(langService.getMessage(LangFields.PAYMENT_METHODS_TEXT, userLang), AppConstant.PAMYENT_MATHODS_DATA + botId));
+        list.add(Map.of(langService.getMessage(LangFields.CARD_NUMBER_TEXT, userLang), AppConstant.CARD_NUMBER_DATA + botId));
+        list.add(Map.of(langService.getMessage(LangFields.GENERATE_CODE_TEXT, userLang), AppConstant.GENERATE_CODE_DATA + botId));
+        list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SCREENSHOTS, userLang), AppConstant.SEE_ALL_SCREENSHOTS + botId));
+        Group group = groupRepository.getById(botId);
         if (group.isWorked()) {
-            list.add(Map.of(langService.getMessage(LangFields.STOP_BOT_TEXT, userId), AppConstant.START_STOP_BOT_DATA + botId));
+            list.add(Map.of(langService.getMessage(LangFields.STOP_BOT_TEXT, userLang), AppConstant.START_STOP_BOT_DATA + botId));
         } else
-            list.add(Map.of(langService.getMessage(LangFields.START_BOT_TEXT, userId), AppConstant.START_STOP_BOT_DATA + botId));
+            list.add(Map.of(langService.getMessage(LangFields.START_BOT_TEXT, userLang), AppConstant.START_STOP_BOT_DATA + botId));
 
-        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userId), AppConstant.BACK_TO_BOT_LIST_DATA));
+        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userLang), AppConstant.BACK_TO_BOT_LIST_DATA));
 
         return buttonService.callbackKeyboard(list);
     }
@@ -144,45 +143,45 @@ public class ResponseButton {
         return buttonService.callbackKeyboard(list);
     }
 
-    public InlineKeyboardMarkup screenshotsKeyboard(Long userId, long id) {
+    public InlineKeyboardMarkup screenshotsKeyboard(String userLang, long id) {
         List<Map<String, String>> list = new ArrayList<>();
         Map<String, String> map = new LinkedHashMap<>();
-        map.put(langService.getMessage(LangFields.ACCEPT_SCREENSHOT_TEXT, userId),
+        map.put(langService.getMessage(LangFields.ACCEPT_SCREENSHOT_TEXT, userLang),
                 AppConstant.ACCEPT_SCREENSHOT_DATA + id);
-        map.put(langService.getMessage(LangFields.REJECT_SCREENSHOT_TEXT, userId),
+        map.put(langService.getMessage(LangFields.REJECT_SCREENSHOT_TEXT, userLang),
                 AppConstant.REJECT_SCREENSHOT_DATA + id);
         list.add(map);
         return buttonService.callbackKeyboard(list);
     }
 
-    public InlineKeyboardMarkup showGroupPayments(Long userId, long botId) {
-        Group group = groupRepository.findById(botId).orElseThrow();
+    public InlineKeyboardMarkup showGroupPayments(String userLang, long botId) {
+        Group group = groupRepository.getById(botId);
         List<Map<String, String>> list = new ArrayList<>();
-        String clickText = langService.getMessage(LangFields.STOP_PAYMENT_CLICK_TEXT, userId);
+        String clickText = langService.getMessage(LangFields.STOP_PAYMENT_CLICK_TEXT, userLang);
         if (!group.isClick()) {
-            clickText = langService.getMessage(LangFields.START_PAYMENT_CLICK_TEXT, userId);
+            clickText = langService.getMessage(LangFields.START_PAYMENT_CLICK_TEXT, userLang);
         }
         list.add(Map.of(clickText, AppConstant.CHANGE_CLICK_STATUS_DATA + botId));
 
-        String paymeText = langService.getMessage(LangFields.STOP_PAYMENT_PAYME_TEXT, userId);
+        String paymeText = langService.getMessage(LangFields.STOP_PAYMENT_PAYME_TEXT, userLang);
         if (!group.isClick()) {
-            paymeText = langService.getMessage(LangFields.START_PAYMENT_PAYME_TEXT, userId);
+            paymeText = langService.getMessage(LangFields.START_PAYMENT_PAYME_TEXT, userLang);
         }
         list.add(Map.of(paymeText, AppConstant.CHANGE_PAYME_STATUS_DATA + botId));
 
-        String screenshotText = langService.getMessage(LangFields.STOP_PAYMENT_SCREENSHOT_TEXT, userId);
+        String screenshotText = langService.getMessage(LangFields.STOP_PAYMENT_SCREENSHOT_TEXT, userLang);
         if (!group.isScreenShot()) {
-            screenshotText = langService.getMessage(LangFields.START_PAYMENT_SCEEENSHOT_TEXT, userId);
+            screenshotText = langService.getMessage(LangFields.START_PAYMENT_SCEEENSHOT_TEXT, userLang);
         }
         list.add(Map.of(screenshotText, AppConstant.CHANGE_SCREENSHOT_STATUS_DATA + botId));
 
-        String codeText = langService.getMessage(LangFields.STOP_PAYMENT_CODE_TEXT, userId);
+        String codeText = langService.getMessage(LangFields.STOP_PAYMENT_CODE_TEXT, userLang);
         if (!group.isCode()) {
-            codeText = langService.getMessage(LangFields.START_PAYMENT_CODE_TEXT, userId);
+            codeText = langService.getMessage(LangFields.START_PAYMENT_CODE_TEXT, userLang);
         }
         list.add(Map.of(codeText, AppConstant.CHANGE_CODE_STATUS_DATA + botId));
 
-        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userId), AppConstant.BACK_TO_BOT_INFO_DATA + botId));
+        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userLang), AppConstant.BACK_TO_BOT_INFO_DATA + botId));
         return buttonService.callbackKeyboard(list);
     }
 
@@ -213,12 +212,12 @@ public class ResponseButton {
         return buttonService.callbackKeyboard(list);
     }
 
-    public InlineKeyboardMarkup showTariffInfo(Long userId, long tariffId) {
-        Tariff tariff = tariffRepository.findById(tariffId).orElseThrow();
+    public InlineKeyboardMarkup showTariffInfo(String userLang, long tariffId) {
+        Tariff tariff = tariffRepository.getById(tariffId);
         List<Map<String, String>> list = new ArrayList<>();
-        list.add(Map.of(langService.getMessage(LangFields.CHANGE_TARIFF_PRICE_TEXT, userId), AppConstant.CHANGE_TARIFF_PRICE_DATA + tariffId));
-        list.add(Map.of(langService.getMessage(LangFields.DELETE_TRAIFF_TEXT, userId), AppConstant.DELETE_TARIFF_DATA + tariffId));
-        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userId), AppConstant.BACK_TO_TARIFFS_DATA + tariff.getBotId()));
+        list.add(Map.of(langService.getMessage(LangFields.CHANGE_TARIFF_PRICE_TEXT, userLang), AppConstant.CHANGE_TARIFF_PRICE_DATA + tariffId));
+        list.add(Map.of(langService.getMessage(LangFields.DELETE_TRAIFF_TEXT, userLang), AppConstant.DELETE_TARIFF_DATA + tariffId));
+        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userLang), AppConstant.BACK_TO_TARIFFS_DATA + tariff.getBotId()));
         return buttonService.callbackKeyboard(list);
     }
 }

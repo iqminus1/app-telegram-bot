@@ -32,7 +32,7 @@ public class CommonUtils {
             users.put(userId, optional.get());
             return optional.get();
         }
-        User user = userRepository.saveOptional(new User(userId, StateEnum.START, null)).get();
+        User user = userRepository.saveOptional(new User(userId, StateEnum.START, null));
         users.put(userId, user);
         return user;
     }
@@ -47,7 +47,7 @@ public class CommonUtils {
             return userLang.get(userId).getLang();
         }
         UserLang user = userLangRepository.findById(userId).orElseGet(() ->
-                userLangRepository.saveOptional(new UserLang(userId, "ru")).get()
+                userLangRepository.save(new UserLang(userId, "ru"))
         );
         userLang.put(userId, user);
         return user.getLang();
@@ -60,7 +60,7 @@ public class CommonUtils {
             return;
         }
         UserLang user = userLangRepository.findById(userId).orElseGet(() ->
-                userLangRepository.saveOptional(new UserLang(userId, language.name())).get()
+                userLangRepository.save(new UserLang(userId, language.name()))
         );
         userLang.put(userId, user);
     }
@@ -84,7 +84,7 @@ public class CommonUtils {
     void saveLanguages() {
         for (Long userId : userLang.keySet()) {
             UserLang lang = userLang.get(userId);
-            userLangRepository.saveOptional(lang);
+            userLangRepository.save(lang);
         }
         userLang.clear();
     }

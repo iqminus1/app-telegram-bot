@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findById(Long id);
 
     @CachePut(value = "userEntity", key = "#user.id")
-    default Optional<User> saveOptional(User user) {
-        return Optional.of(save(user));
+    default User saveOptional(User user) {
+        return save(user);
     }
 }

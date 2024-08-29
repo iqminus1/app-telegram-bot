@@ -12,21 +12,30 @@ import java.util.Optional;
 
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
+
+    @Cacheable(value = "groupEntityById", key = "#id")
+    default Group getById(Long id) {
+        return findById(id).orElseThrow();
+    }
+
     @Cacheable(value = "groupEntityByOwnerId", key = "#adminId")
     List<Group> findAllByAdminId(Long adminId);
 
     @Cacheable(value = "groupEntityGroupId", key = "#groupId")
     Optional<Group> findByGroupId(Long groupId);
 
-    @CacheEvict(value = {"groupEntityByOwnerId", "adminResponseServiceStart"}, allEntries = true)
-    @CachePut(value = "groupEntityGroupId", key = "#group.groupId")
-    default Optional<Group> saveOptional(Group group) {
-        return Optional.of(save(group));
+    @CacheEvict(value = "groupEntityGroupId", allEntries = true)
+    @CachePut(value = "groupEntityById", key = "#result.id")
+    default Group saveOptional(Group group) {
+        clearByOwnerId(group);
+        return save(group);
     }
 
-    @Override
-    @CacheEvict(value = {"groupEntityGroupId", "groupEntityByOwnerId", "adminResponseServiceStart"}, allEntries = true)
-    void delete(Group group);
+    @CacheEvict(value = "groupEntityByOwnerId", key = "#group.adminId")
+    default void clearByOwnerId(Group group) {
+
+    }
+
 
     Optional<Group> findByBotToken(String text);
 }

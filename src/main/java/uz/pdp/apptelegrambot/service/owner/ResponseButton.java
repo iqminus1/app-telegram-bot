@@ -19,10 +19,7 @@ import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.utils.AppConstant;
 import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -121,7 +118,7 @@ public class ResponseButton {
         list.add(Map.of(langService.getMessage(LangFields.PAYMENT_METHODS_TEXT, userId), AppConstant.PAMYENT_MATHODS_DATA + botId));
         list.add(Map.of(langService.getMessage(LangFields.CARD_NUMBER_TEXT, userId), AppConstant.CARD_NUMBER_DATA + botId));
         list.add(Map.of(langService.getMessage(LangFields.GENERATE_CODE_TEXT, userId), AppConstant.GENERATE_CODE_DATA + botId));
-        list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SCREENSHOTS, userId), AppConstant.SEE_ALL_SCREENSHOTS));
+        list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SCREENSHOTS, userId), AppConstant.SEE_ALL_SCREENSHOTS + botId));
         Group group = groupRepository.findById(botId).orElseThrow();
         if (group.isWorked()) {
             list.add(Map.of(langService.getMessage(LangFields.STOP_BOT_TEXT, userId), AppConstant.START_STOP_BOT_DATA + botId));
@@ -144,6 +141,17 @@ public class ResponseButton {
         if (tariffs.size() != 5)
             list.add(Map.of(langService.getMessage(LangFields.ADD_TARIFF_TEXT, userLang), AppConstant.ADD_TARIFF_DATA + botId));
         list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userLang), AppConstant.BACK_TO_BOT_INFO_DATA + botId));
+        return buttonService.callbackKeyboard(list);
+    }
+
+    public InlineKeyboardMarkup screenshotsKeyboard(Long userId, long id) {
+        List<Map<String, String>> list = new ArrayList<>();
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put(langService.getMessage(LangFields.ACCEPT_SCREENSHOT_TEXT, userId),
+                AppConstant.ACCEPT_SCREENSHOT_DATA + id);
+        map.put(langService.getMessage(LangFields.REJECT_SCREENSHOT_TEXT, userId),
+                AppConstant.REJECT_SCREENSHOT_DATA + id);
+        list.add(map);
         return buttonService.callbackKeyboard(list);
     }
 }

@@ -15,6 +15,8 @@ public interface AppConstant {
     String BOT_DATA = "botId:";
     String FREE_DATA = "freeData:";
     String GENERATE_CODE_FOR_TARIFF_DATA = "codeByTariff:";
+    String ACCEPT_SCREENSHOT_DATA = "acceptScreenshot:";
+    String REJECT_SCREENSHOT_DATA = "rejectScreenshot:";
     //backToBotList
     String BACK_TO_BOT_LIST_DATA = "backTBL";
 

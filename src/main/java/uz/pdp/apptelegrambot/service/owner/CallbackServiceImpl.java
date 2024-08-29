@@ -5,15 +5,14 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import uz.pdp.apptelegrambot.entity.CodeGroup;
-import uz.pdp.apptelegrambot.entity.Group;
-import uz.pdp.apptelegrambot.entity.Tariff;
-import uz.pdp.apptelegrambot.entity.User;
+import uz.pdp.apptelegrambot.entity.*;
 import uz.pdp.apptelegrambot.enums.ExpireType;
 import uz.pdp.apptelegrambot.enums.LangFields;
+import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 import uz.pdp.apptelegrambot.enums.StateEnum;
 import uz.pdp.apptelegrambot.repository.CodeGroupRepository;
 import uz.pdp.apptelegrambot.repository.GroupRepository;
+import uz.pdp.apptelegrambot.repository.ScreenshotGroupRepository;
 import uz.pdp.apptelegrambot.repository.TariffRepository;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.owner.bot.OwnerSender;
@@ -36,6 +35,7 @@ public class CallbackServiceImpl implements CallbackService {
     private final TariffRepository tariffRepository;
     private final Random random;
     private final CodeGroupRepository codeGroupRepository;
+    private final ScreenshotGroupRepository screenshotGroupRepository;
 
     @Override
     public void process(CallbackQuery callbackQuery) {
@@ -60,6 +60,10 @@ public class CallbackServiceImpl implements CallbackService {
                     showTariffsForGenerateCode(callbackQuery);
                 } else if (data.startsWith(AppConstant.GENERATE_CODE_FOR_TARIFF_DATA)) {
                     generateCode(callbackQuery);
+                } else if (data.startsWith(AppConstant.SEE_ALL_SCREENSHOTS)) {
+                    showScreenshots(callbackQuery);
+                } else if (data.startsWith(AppConstant.CARD_NUMBER_DATA)) {
+                    addCardNumber(callbackQuery);
                 }
             }
             case SELECTING_TARIFF -> {
@@ -69,6 +73,35 @@ public class CallbackServiceImpl implements CallbackService {
                     changeTariffStatus(userId, data, callbackQuery);
                 }
             }
+        }
+    }
+
+    private void addCardNumber(CallbackQuery callbackQuery) {
+        Long userId = callbackQuery.getFrom().getId();
+        Integer messageId = callbackQuery.getMessage().getMessageId();
+        sender.deleteMessage(userId, messageId);
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        temp.addTempGroup(groupRepository.findById(botId).orElseThrow());
+        temp.addTempBotId(userId, botId);
+        String message = langService.getMessage(LangFields.SEND_CARD_NUMBER_TEXT, userId);
+        sender.sendMessageAndRemove(userId, message);
+        commonUtils.setState(userId, StateEnum.SENDING_CARD_NUMBER);
+    }
+
+    private void showScreenshots(CallbackQuery callbackQuery) {
+        Long userId = callbackQuery.getFrom().getId();
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Group group = groupRepository.findById(botId).orElseThrow();
+        List<ScreenshotGroup> screenshots = screenshotGroupRepository.findAllByGroupIdAndStatus(group.getGroupId(), ScreenshotStatus.DONT_SEE);
+        if (screenshots.isEmpty()) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.SCREENSHOTS_EMPTY_TEXT, userId));
+            return;
+        }
+        for (ScreenshotGroup screenshot : screenshots) {
+            Long screenshotId = screenshot.getId();
+            InlineKeyboardMarkup keyboard = responseButton.screenshotsKeyboard(userId, screenshotId);
+            String message = langService.getMessage(LangFields.UN_CHECKED_SCREENSHOT_TEXT, userId);
+            sender.sendPhoto(userId, message, screenshot.getPath(), keyboard);
         }
     }
 

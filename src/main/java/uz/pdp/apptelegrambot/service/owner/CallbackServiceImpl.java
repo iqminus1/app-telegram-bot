@@ -68,8 +68,16 @@ public class CallbackServiceImpl implements CallbackService {
                     showTariffsForGenerateCode(callbackQuery);
                 } else if (data.startsWith(AppConstant.CARD_NUMBER_DATA)) {
                     addCardNumber(callbackQuery);
-                } else if (data.equals(AppConstant.FREE_DATA)) {
-                    System.out.println("1");
+                } else if (data.startsWith(AppConstant.SHOW_PRICE_INFO_DATA)) {
+                    showTariffInfo(callbackQuery);
+                } else if (data.startsWith(AppConstant.DELETE_TARIFF_DATA)) {
+                    deleteTariff(callbackQuery);
+                } else if (data.startsWith(AppConstant.CHANGE_TARIFF_PRICE_DATA)) {
+                    changeTariffPrice(callbackQuery);
+                } else if (data.startsWith(AppConstant.ADD_TARIFF_DATA)) {
+                    addTariffs(callbackQuery);
+                } else if (data.startsWith(AppConstant.CREATE_TARIFF_DATA)) {
+                    createTariff(callbackQuery);
                 } else if (data.startsWith(AppConstant.CHANGE_CLICK_STATUS_DATA)) {
                     changeStatusClick(callbackQuery);
                 } else if (data.startsWith(AppConstant.CHANGE_PAYME_STATUS_DATA)) {
@@ -78,6 +86,8 @@ public class CallbackServiceImpl implements CallbackService {
                     changeStatusScreenshot(callbackQuery);
                 } else if (data.startsWith(AppConstant.CHANGE_CODE_STATUS_DATA)) {
                     changeStatusCode(callbackQuery);
+                } else if (data.startsWith(AppConstant.BACK_TO_TARIFFS_DATA)) {
+                    showTariffList(callbackQuery);
                 } else if (data.equals(AppConstant.BACK_TO_BOT_LIST_DATA)) {
                     backToList(callbackQuery);
                 } else if (data.startsWith(AppConstant.BACK_TO_BOT_INFO_DATA)) {
@@ -94,6 +104,48 @@ public class CallbackServiceImpl implements CallbackService {
                 }
             }
         }
+    }
+
+    private void changeTariffPrice(CallbackQuery callbackQuery) {
+        Long userId = callbackQuery.getFrom().getId();
+        long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Tariff tariff = tariffRepository.findById(tariffId).orElseThrow();
+        temp.addTempTariff(userId, tariff);
+        commonUtils.setState(userId, StateEnum.SENDING_TARIFF_PRICE);
+        sender.sendMessage(userId, responseText.getSendExpireText(tariff.getType().ordinal(), userId));
+    }
+
+    private void deleteTariff(CallbackQuery callbackQuery) {
+        long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Tariff tariff = tariffRepository.findById(tariffId).orElseThrow();
+        tariffRepository.delete(tariff);
+        callbackQuery.setData(":" + tariff.getBotId());
+        showTariffList(callbackQuery);
+    }
+
+    private void createTariff(CallbackQuery callbackQuery) {
+        String[] split = callbackQuery.getData().split("\\+");
+        int ordinal = Integer.parseInt(split[0].split(":")[1]);
+        long botId = Long.parseLong(split[1]);
+        Tariff tariff = new Tariff(botId, ExpireType.values()[ordinal], null);
+        Long userId = callbackQuery.getFrom().getId();
+        temp.addTempTariff(userId, tariff);
+        commonUtils.setState(userId, StateEnum.SENDING_TARIFF_PRICE);
+        sender.sendMessageAndRemove(userId, responseText.getSendExpireText(ordinal, userId));
+    }
+
+    private void addTariffs(CallbackQuery callbackQuery) {
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Long userId = callbackQuery.getFrom().getId();
+        InlineKeyboardMarkup markup = responseButton.addTariff(userId, botId);
+        sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), langService.getMessage(LangFields.SELECT_CHOOSE_TEXT, userId), markup);
+    }
+
+    private void showTariffInfo(CallbackQuery callbackQuery) {
+        long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Long userId = callbackQuery.getFrom().getId();
+        InlineKeyboardMarkup markup = responseButton.showTariffInfo(userId, tariffId);
+        sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), langService.getMessage(LangFields.SELECT_CHOOSE_TEXT, userId), markup);
     }
 
     private void changeStatusClick(CallbackQuery callbackQuery) {
@@ -292,7 +344,7 @@ public class CallbackServiceImpl implements CallbackService {
     private void showTariffList(CallbackQuery callbackQuery) {
         long userId = callbackQuery.getFrom().getId();
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        InlineKeyboardMarkup markup = responseButton.showTariffs(botId, userId, AppConstant.FREE_DATA);
+        InlineKeyboardMarkup markup = responseButton.showTariffs(botId, userId, AppConstant.SHOW_PRICE_INFO_DATA);
         String message = langService.getMessage(LangFields.SELECT_CHOOSE_TEXT, userId);
         sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), message, markup);
     }

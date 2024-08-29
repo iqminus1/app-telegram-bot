@@ -185,4 +185,40 @@ public class ResponseButton {
         list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userId), AppConstant.BACK_TO_BOT_INFO_DATA + botId));
         return buttonService.callbackKeyboard(list);
     }
+
+    public InlineKeyboardMarkup addTariff(Long userId, Long botId) {
+        List<Integer> ordinals = tariffRepository.findAllByBotId(botId).stream().map(t -> t.getType().ordinal()).toList();
+        List<Map<String, String>> list = new ArrayList<>();
+        String userLang = commonUtils.getUserLang(userId);
+        if (!ordinals.contains(0)) {
+            list.add(Map.of(responseText.getTariffExpireText(0, userLang), AppConstant.CREATE_TARIFF_DATA + 0 + "+" + botId))
+            ;
+        }
+        if (!ordinals.contains(1)) {
+            list.add(Map.of(responseText.getTariffExpireText(1, userLang), AppConstant.CREATE_TARIFF_DATA + 1 + "+" + botId))
+            ;
+        }
+        if (!ordinals.contains(2)) {
+            list.add(Map.of(responseText.getTariffExpireText(2, userLang), AppConstant.CREATE_TARIFF_DATA + 2 + "+" + botId))
+            ;
+        }
+        if (!ordinals.contains(3)) {
+            list.add(Map.of(responseText.getTariffExpireText(3, userLang), AppConstant.CREATE_TARIFF_DATA + 3 + "+" + botId))
+            ;
+        }
+        if (!ordinals.contains(4)) {
+            list.add(Map.of(responseText.getTariffExpireText(4, userLang), AppConstant.CREATE_TARIFF_DATA + 4 + "+" + botId));
+        }
+        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userLang), AppConstant.BACK_TO_TARIFFS_DATA + botId));
+        return buttonService.callbackKeyboard(list);
+    }
+
+    public InlineKeyboardMarkup showTariffInfo(Long userId, long tariffId) {
+        Tariff tariff = tariffRepository.findById(tariffId).orElseThrow();
+        List<Map<String, String>> list = new ArrayList<>();
+        list.add(Map.of(langService.getMessage(LangFields.CHANGE_TARIFF_PRICE_TEXT, userId), AppConstant.CHANGE_TARIFF_PRICE_DATA + tariffId));
+        list.add(Map.of(langService.getMessage(LangFields.DELETE_TRAIFF_TEXT, userId), AppConstant.DELETE_TARIFF_DATA + tariffId));
+        list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userId), AppConstant.BACK_TO_TARIFFS_DATA + tariff.getBotId()));
+        return buttonService.callbackKeyboard(list);
+    }
 }

@@ -11,17 +11,18 @@ public interface AppConstant {
     String TARIFF_SELECTING_DATA = "tariffSelectData:";
     String GREEN_TEXT = " \uD83D\uDFE2";
     String ACCEPT_TARIFFS_DATA = "acceptTariffs";
-    String PAYME = "payment:Payme";
-    String CLICK = "payment:Click";
     String SCREENSHOT = "payment:Screenshot";
     String TARIFF_DATA = "tariffId:";
     String FILE_PATH = "C:\\Users\\User\\Desktop\\app-telegram-bot\\files";
-    String LINK_NAME = "create by bot";
     String BOT_DATA = "botId:";
-    String FREE_DATA = "freeData:";
+    String SHOW_PRICE_INFO_DATA = "showPriceInfoData:";
     String GENERATE_CODE_FOR_TARIFF_DATA = "codeByTariff:";
     String ACCEPT_SCREENSHOT_DATA = "acceptScreenshot:";
     String REJECT_SCREENSHOT_DATA = "rejectScreenshot:";
+    String CHANGE_TARIFF_PRICE_DATA = "changeTariffPrice:";
+    String DELETE_TARIFF_DATA = "deleteTariff:";
+    //BO-> by ordinal
+    String CREATE_TARIFF_DATA = "createTariffBO:";
     //backToBotList
     String BACK_TO_BOT_LIST_DATA = "backTBL";
 
@@ -38,6 +39,7 @@ public interface AppConstant {
     String CHANGE_PAYME_STATUS_DATA = "changePamyeStatusBBI:";
     String CHANGE_SCREENSHOT_STATUS_DATA = "changeScreenshotStatusBBI:";
     String CHANGE_CODE_STATUS_DATA = "changeCodeStatusBBI:";
+    String BACK_TO_TARIFFS_DATA = "backToTariffsBBI:";
 
     static Order updateOrderExpire(Order order, ExpireType type) {
         if (order.getExpireDay() == null) {

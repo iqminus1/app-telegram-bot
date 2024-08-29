@@ -13,6 +13,7 @@ public interface AppConstant {
     String ACCEPT_TARIFFS_DATA = "acceptTariffs";
     String SCREENSHOT = "payment:Screenshot";
     String TARIFF_DATA = "tariffId:";
+    String GROUP_LIST_CODE_TEXT = "77854632589:ACfhhsJAFaDFGHJBggKJSDGYgjdsjhdsgY";
     String FILE_PATH = "C:\\Users\\User\\Desktop\\app-telegram-bot\\files";
     String BOT_DATA = "botId:";
     String SHOW_PRICE_INFO_DATA = "showPriceInfoData:";
@@ -40,6 +41,7 @@ public interface AppConstant {
     String CHANGE_SCREENSHOT_STATUS_DATA = "changeScreenshotStatusBBI:";
     String CHANGE_CODE_STATUS_DATA = "changeCodeStatusBBI:";
     String BACK_TO_TARIFFS_DATA = "backToTariffsBBI:";
+    String SHOW_GROUP_LIST = "showGroupList:";
 
     static Order updateOrderExpire(Order order, ExpireType type) {
         if (order.getExpireDay() == null) {

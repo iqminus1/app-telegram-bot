@@ -38,4 +38,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
 
     Optional<Group> findByBotToken(String text);
+
+    Optional<Group> findByBotUsername(String username);
 }

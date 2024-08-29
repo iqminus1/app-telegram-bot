@@ -41,7 +41,7 @@ public class AdminCallbackServiceImpl implements AdminCallbackService {
             return;
         }
         long tariffId = Long.parseLong(callbackQuery.getData().split("\\+")[1].split(":")[1]);
-        Tariff tariff = tariffRepository.findById(tariffId).orElseThrow();
+        Tariff tariff = tariffRepository.getById(tariffId);
         utils.setUserState(userId, StateEnum.SENDING_JOIN_REQ_SCREENSHOT);
         ScreenshotGroup screenshotGroup = new ScreenshotGroup();
         screenshotGroup.setGroupId(group.getGroupId());

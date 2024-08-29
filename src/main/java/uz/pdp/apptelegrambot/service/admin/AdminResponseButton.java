@@ -30,9 +30,8 @@ public class AdminResponseButton {
     private final TariffRepository tariffRepository;
     private final ResponseText responseText;
 
-    @Cacheable(value = "adminResponseServiceStart", key = "#botId+#lang")
     public ReplyKeyboard start(Long botId, String lang) {
-        Group group = groupRepository.findById(botId).orElseThrow();
+        Group group = groupRepository.getById(botId);
         List<String> list = new ArrayList<>();
         if (group.isClick()) {
             list.add(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_CLICK_TEXT, lang));

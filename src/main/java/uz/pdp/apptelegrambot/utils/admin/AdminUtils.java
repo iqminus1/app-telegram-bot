@@ -37,7 +37,7 @@ public class AdminUtils {
             return;
         }
         UserLang userLang = new UserLang(userId, lang);
-        userLangRepository.saveOptional(userLang);
+        userLangRepository.save(userLang);
         usersLang.put(userId, userLang);
     }
 

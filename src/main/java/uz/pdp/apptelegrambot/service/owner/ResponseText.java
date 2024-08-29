@@ -10,21 +10,21 @@ import uz.pdp.apptelegrambot.service.LangService;
 public class ResponseText {
     private final LangService langService;
 
-    public String getSendExpireText(Integer ordinal, Long userId) {
+    public String getSendExpireText(Integer ordinal, String lang) {
         if (ordinal == 0) {
-            return langService.getMessage(LangFields.SEND_WEEKLY_TARIFF_PRICE_TEXT, userId);
+            return langService.getMessage(LangFields.SEND_WEEKLY_TARIFF_PRICE_TEXT, lang);
         }
         if (ordinal == 1) {
-            return langService.getMessage(LangFields.SEND_DAY15_TARIFF_PRICE_TEXT, userId);
+            return langService.getMessage(LangFields.SEND_DAY15_TARIFF_PRICE_TEXT, lang);
         }
         if (ordinal == 2) {
-            return langService.getMessage(LangFields.SEND_MONTHLY_TARIFF_PRICE_TEXT, userId);
+            return langService.getMessage(LangFields.SEND_MONTHLY_TARIFF_PRICE_TEXT, lang);
         }
         if (ordinal == 3) {
-            return langService.getMessage(LangFields.SEND_YEAR_TARIFF_PRICE_TEXT, userId);
+            return langService.getMessage(LangFields.SEND_YEAR_TARIFF_PRICE_TEXT, lang);
         }
         if (ordinal == 4) {
-            return langService.getMessage(LangFields.SEND_UNLIMITED_TARIFF_PRICE_TEXT, userId);
+            return langService.getMessage(LangFields.SEND_UNLIMITED_TARIFF_PRICE_TEXT, lang);
         }
         return null;
     }

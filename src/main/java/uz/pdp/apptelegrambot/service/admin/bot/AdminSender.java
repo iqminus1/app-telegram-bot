@@ -205,6 +205,6 @@ public class AdminSender extends DefaultAbsSender {
     }
 
     public Group getGroup() {
-        return groupRepository.findByBotToken(token).orElseThrow();
+        return groupRepository.getByBotToken(token);
     }
 }

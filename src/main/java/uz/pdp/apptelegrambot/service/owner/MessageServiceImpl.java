@@ -198,7 +198,7 @@ public class MessageServiceImpl implements MessageService {
             sender.sendMessage(userId, langService.getMessage(LangFields.SEND_VALID_BOT_TOKEN_TEXT, userLang));
             return;
         }
-        if (groupRepository.findByBotToken(text).isPresent()) {
+        if (groupRepository.getByBotToken(text) != null) {
             sender.sendMessage(userId, langService.getMessage(LangFields.ALREADY_TOKEN_SEND_US_TEXT, userLang), responseButton.start(userLang));
             return;
         }
@@ -211,7 +211,7 @@ public class MessageServiceImpl implements MessageService {
         temp.addTempGroup(group);
         adminController.addAdminBot(text, userId);
         commonUtils.setState(userId, StateEnum.SELECTING_TARIFF);
-        Group savedGroup = groupRepository.findByBotToken(text).orElseThrow();
+        Group savedGroup = groupRepository.getByBotToken(text);
         InlineKeyboardMarkup markup = responseButton.tariffList(savedGroup.getId(), userId);
         sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_TARIFF_TEXT, userLang), markup);
     }

@@ -1,7 +1,6 @@
 package uz.pdp.apptelegrambot.service.owner;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -118,7 +117,7 @@ public class ResponseButton {
         list.add(Map.of(langService.getMessage(LangFields.CARD_NUMBER_TEXT, userLang), AppConstant.CARD_NUMBER_DATA + botId));
         list.add(Map.of(langService.getMessage(LangFields.GENERATE_CODE_TEXT, userLang), AppConstant.GENERATE_CODE_DATA + botId));
         list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SCREENSHOTS, userLang), AppConstant.SEE_ALL_SCREENSHOTS + botId));
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         if (group.isWorked()) {
             list.add(Map.of(langService.getMessage(LangFields.STOP_BOT_TEXT, userLang), AppConstant.START_STOP_BOT_DATA + botId));
         } else
@@ -155,7 +154,7 @@ public class ResponseButton {
     }
 
     public InlineKeyboardMarkup showGroupPayments(String userLang, long botId) {
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         List<Map<String, String>> list = new ArrayList<>();
         String clickText = langService.getMessage(LangFields.STOP_PAYMENT_CLICK_TEXT, userLang);
         if (!group.isClick()) {

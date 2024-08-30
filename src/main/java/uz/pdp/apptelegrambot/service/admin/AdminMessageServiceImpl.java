@@ -124,7 +124,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     }
 
     private void checkCode(String text, Long userId, String userLang) {
-        Group group = groupRepository.findByBotToken(token).orElseThrow();
+        Group group = groupRepository.getByBotToken(token);
         if (!group.isCode()) {
             adminUtils.setUserState(userId, StateEnum.START);
             sender.sendMessage(userId, langService.getMessage(LangFields.SECTION_DONT_WORK_TEXT, userLang), responseButton.start(group.getId(), userLang));
@@ -140,7 +140,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         codeGroup.setUserId(userId);
         codeGroup.setActive(true);
         codeGroup.setActiveAt(LocalDateTime.now());
-        codeGroupRepository.saveOptional(codeGroup);
+        codeGroupRepository.save(codeGroup);
         Optional<Order> optionalOrder = orderRepository.findByUserIdAndGroupId(userId, group.getGroupId());
         if (optionalOrder.isPresent()) {
             Order order = updateOrderExpire(optionalOrder.get(), codeGroup.getType());
@@ -164,7 +164,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     }
 
     private void checkAndSendTariffs(Long userId, String userLang) {
-        Group group = groupRepository.findByBotToken(token).orElseThrow();
+        Group group = groupRepository.getByBotToken(token);
         if (!group.isScreenShot())
             return;
 

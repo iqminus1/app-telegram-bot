@@ -18,7 +18,8 @@ public class ActivateController {
     public Group activate(@PathVariable String username,
                           @RequestParam(required = false) Integer day,
                           @RequestParam(required = false) Integer month,
-                          @RequestParam(required = false) Integer year) {
+                          @RequestParam(required = false) Integer year,
+                          @RequestParam(required = false) Boolean payment) {
         Optional<Group> optionalGroup = groupRepository.findByBotUsername(username);
         if (optionalGroup.isEmpty()) {
             throw new RuntimeException("group not found by username -> " + username);
@@ -41,6 +42,9 @@ public class ActivateController {
                 group.setExpireAt(LocalDateTime.now().plusYears(year));
             } else
                 group.setExpireAt(group.getExpireAt().plusYears(year));
+        }
+        if (payment != null) {
+            group.setAllowPayment(payment);
         }
         groupRepository.saveOptional(group);
         return group;

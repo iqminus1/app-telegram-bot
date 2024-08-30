@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Random;
 
-@EnableCaching
+//@EnableCaching
 @EnableAsync
 @EnableScheduling
 @SpringBootApplication

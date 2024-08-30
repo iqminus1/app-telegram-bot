@@ -28,7 +28,20 @@ public class AdminCallbackServiceImpl implements AdminCallbackService {
         String data = callbackQuery.getData();
         if (data.startsWith(AppConstant.SCREENSHOT)) {
             sendTextScreenshot(callbackQuery);
+        } else if (data.startsWith(AppConstant.GET_LINK_FOR_JOIN_DATA)) {
+            sendLinkForJoin(callbackQuery);
         }
+    }
+
+    private void sendLinkForJoin(CallbackQuery callbackQuery) {
+        Long userId = callbackQuery.getFrom().getId();
+        sender.deleteMessage(userId, callbackQuery.getMessage().getMessageId());
+        String userLang = utils.getUserLang(userId);
+        if (sender.checkGroup(userId)) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.YOU_HAVE_THIS_CHANNEL_TEXT, userLang));
+            return;
+        }
+        sender.sendMessage(userId,langService.getMessage(LangFields.SEND_VALID_ORDER_TEXT,userLang)+" "+sender.getLink());
     }
 
     private void sendTextScreenshot(CallbackQuery callbackQuery) {

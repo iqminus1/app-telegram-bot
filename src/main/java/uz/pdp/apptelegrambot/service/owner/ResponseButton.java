@@ -170,7 +170,7 @@ public class ResponseButton {
 
         String screenshotText = langService.getMessage(LangFields.STOP_PAYMENT_SCREENSHOT_TEXT, userLang);
         if (!group.isScreenShot()) {
-            screenshotText = langService.getMessage(LangFields.START_PAYMENT_SCEEENSHOT_TEXT, userLang);
+            screenshotText = langService.getMessage(LangFields.START_PAYMENT_SCREENSHOT_TEXT, userLang);
         }
         list.add(Map.of(screenshotText, AppConstant.CHANGE_SCREENSHOT_STATUS_DATA + botId));
 
@@ -215,7 +215,7 @@ public class ResponseButton {
         Tariff tariff = tariffRepository.getById(tariffId);
         List<Map<String, String>> list = new ArrayList<>();
         list.add(Map.of(langService.getMessage(LangFields.CHANGE_TARIFF_PRICE_TEXT, userLang), AppConstant.CHANGE_TARIFF_PRICE_DATA + tariffId));
-        list.add(Map.of(langService.getMessage(LangFields.DELETE_TRAIFF_TEXT, userLang), AppConstant.DELETE_TARIFF_DATA + tariffId));
+        list.add(Map.of(langService.getMessage(LangFields.DELETE_TARIFF_TEXT, userLang), AppConstant.DELETE_TARIFF_DATA + tariffId));
         list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userLang), AppConstant.BACK_TO_TARIFFS_DATA + tariff.getBotId()));
         return buttonService.callbackKeyboard(list);
     }

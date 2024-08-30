@@ -42,6 +42,7 @@ public interface AppConstant {
     String CHANGE_CODE_STATUS_DATA = "changeCodeStatusBBI:";
     String BACK_TO_TARIFFS_DATA = "backToTariffsBBI:";
     String SHOW_GROUP_LIST = "showGroupList:";
+    String GET_LINK_FOR_JOIN_DATA = "getLinkForJoinBBI";
 
     static Order updateOrderExpire(Order order, ExpireType type) {
         if (order.getExpireDay() == null) {

@@ -67,6 +67,8 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                             sendCodeText(userId, userLang);
                         } else if (text.equals(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_SCREENSHOT_TEXT, userLang))) {
                             checkAndSendTariffs(userId, userLang);
+                        } else if (text.equals(langService.getMessage(LangFields.MY_ORDERS_TEXT, userLang))) {
+                            sendOrders(userId, userLang);
                         }
                     }
                     case SELECT_LANGUAGE -> changeLanguage(text, userId, userLang);
@@ -82,6 +84,23 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                 }
             }
         }
+    }
+
+    private void sendOrders(Long userId, String userLang) {
+        Group group = sender.getGroup();
+        Optional<Order> optionalOrder = orderRepository.findByUserIdAndGroupId(userId, group.getGroupId());
+        if (optionalOrder.isEmpty()) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.EMPTY_ORDERS_LIST_TEXT, userLang));
+            return;
+        }
+        Order order = optionalOrder.get();
+        if (order.getExpireDay().isAfter(LocalDateTime.now())) {
+            InlineKeyboardMarkup button = buttonService.callbackKeyboard(List.of(Map.of(langService.getMessage(LangFields.GET_LINK_FOR_JOIN_TEXT, userLang), AppConstant.GET_LINK_FOR_JOIN_DATA + group.getId())));
+            sender.sendMessage(userId, langService.getMessage(LangFields.SHOW_NON_EXPIRE_ORDER_INFO_TEXT, userLang), button);
+            return;
+        }
+        sender.sendMessage(userId, langService.getMessage(LangFields.SHOW_EXPIRE_ORDER_INFO_TEXT, userLang));
+
     }
 
     private void savePhoto(Message message) {

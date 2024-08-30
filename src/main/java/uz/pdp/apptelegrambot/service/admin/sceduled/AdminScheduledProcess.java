@@ -29,7 +29,7 @@ public class AdminScheduledProcess {
                 .filter(o -> o.getExpireDay().isBefore(LocalDateTime.now()))
                 .collect(Collectors.groupingBy(Order::getGroupId));
         for (Long groupId : collect.keySet()) {
-            Group group = groupRepository.findByGroupId(groupId).orElseThrow();
+            Group group = groupRepository.getByGroupId(groupId);
             AdminSender sender = adminController.getSenderByAdminId(group.getAdminId());
             List<Order> orders = collect.get(groupId);
             sender.kickUsers(orders);

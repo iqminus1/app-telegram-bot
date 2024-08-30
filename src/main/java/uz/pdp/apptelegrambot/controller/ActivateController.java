@@ -6,7 +6,6 @@ import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.repository.GroupRepository;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,11 +19,10 @@ public class ActivateController {
                           @RequestParam(required = false) Integer month,
                           @RequestParam(required = false) Integer year,
                           @RequestParam(required = false) Boolean payment) {
-        Optional<Group> optionalGroup = groupRepository.findByBotUsername(username);
-        if (optionalGroup.isEmpty()) {
+        Group group = groupRepository.getByBotUsername(username);
+        if (group == null) {
             throw new RuntimeException("group not found by username -> " + username);
         }
-        Group group = optionalGroup.get();
         if (day != null) {
             if (group.getExpireAt().isBefore(LocalDateTime.now())) {
                 group.setExpireAt(LocalDateTime.now().plusDays(day));

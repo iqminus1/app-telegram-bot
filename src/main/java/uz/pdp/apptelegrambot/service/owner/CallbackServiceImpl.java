@@ -151,7 +151,7 @@ public class CallbackServiceImpl implements CallbackService {
 
     private void changeStatusClick(CallbackQuery callbackQuery) {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         if (group.isAllowPayment()) {
             group.setClick(!group.isClick());
             groupRepository.saveOptional(group);
@@ -165,7 +165,7 @@ public class CallbackServiceImpl implements CallbackService {
 
     private void changeStatusPayme(CallbackQuery callbackQuery) {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         if (group.isAllowPayment()) {
             group.setPayme(!group.isPayme());
             groupRepository.saveOptional(group);
@@ -180,7 +180,7 @@ public class CallbackServiceImpl implements CallbackService {
     private void changeStatusScreenshot(CallbackQuery callbackQuery) {
 
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         group.setScreenShot(!group.isScreenShot());
         groupRepository.saveOptional(group);
         showPaymentsInfo(callbackQuery);
@@ -189,7 +189,7 @@ public class CallbackServiceImpl implements CallbackService {
     private void changeStatusCode(CallbackQuery callbackQuery) {
 
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         group.setCode(!group.isCode());
         groupRepository.saveOptional(group);
         showPaymentsInfo(callbackQuery);
@@ -261,7 +261,7 @@ public class CallbackServiceImpl implements CallbackService {
 
     private void startStopBot(CallbackQuery callbackQuery) {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         group.setWorked(!group.isWorked());
         groupRepository.saveOptional(group);
         showBotInfo(callbackQuery);
@@ -282,7 +282,7 @@ public class CallbackServiceImpl implements CallbackService {
     private void showScreenshots(CallbackQuery callbackQuery) {
         Long userId = callbackQuery.getFrom().getId();
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         String userLang = commonUtils.getUserLang(userId);
         if (group.getGroupId()==null) {
             sender.sendMessage(userId,langService.getMessage(LangFields.FIRST_ADD_GROUP_TEXT,userLang));
@@ -312,7 +312,7 @@ public class CallbackServiceImpl implements CallbackService {
         }
         Long userId = callbackQuery.getFrom().getId();
         CodeGroup codeGroup = new CodeGroup(generateCode(), tariff.getBotId(), null, tariff.getType(), false, null, tariffId, tariff.getPrice());
-        codeGroupRepository.saveOptional(codeGroup);
+        codeGroupRepository.save(codeGroup);
         String message = getCodeText(commonUtils.getUserLang(userId), tariff.getType().ordinal());
         sender.sendMessage(userId, message + " " + codeGroup.getCode());
     }
@@ -365,7 +365,7 @@ public class CallbackServiceImpl implements CallbackService {
 
     private void showBotInfo(CallbackQuery callbackQuery) {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         Long userId = callbackQuery.getFrom().getId();
         String userLang = commonUtils.getUserLang(userId);
         String message = langService.getMessage(LangFields.BOT_INFO_TEXT, userLang).formatted(group.getBotUsername(), group.getName());

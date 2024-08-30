@@ -31,7 +31,7 @@ public class AdminResponseButton {
     private final ResponseText responseText;
 
     public ReplyKeyboard start(Long botId, String lang) {
-        Group group = groupRepository.getById(botId);
+        Group group = groupRepository.getByIdDefault(botId);
         List<String> list = new ArrayList<>();
         if (group.isClick()) {
             list.add(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_CLICK_TEXT, lang));

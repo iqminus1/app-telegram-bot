@@ -14,30 +14,59 @@ import java.util.Optional;
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
     @Cacheable(value = "groupEntityById", key = "#id")
-    default Group getById(Long id) {
+    default Group getByIdDefault(long id) {
         return findById(id).orElseThrow();
     }
 
     @Cacheable(value = "groupEntityByOwnerId", key = "#adminId")
     List<Group> findAllByAdminId(Long adminId);
 
-    @Cacheable(value = "groupEntityGroupId", key = "#groupId")
     Optional<Group> findByGroupId(Long groupId);
 
-    @CacheEvict(value = "groupEntityGroupId", allEntries = true)
+    @Cacheable(value = "groupEntityGroupId", key = "#groupId")
+    default Group getByGroupId(Long groupId) {
+        return findByGroupId(groupId).orElse(null);
+    }
+
+    Optional<Group> findByBotToken(String text);
+
+    @Cacheable(value = "groupEntityByBotToken", key = "#text")
+    default Group getByBotToken(String text) {
+        return findByBotToken(text).orElse(null);
+    }
+
+    Optional<Group> findByBotUsername(String username);
+
+    @Cacheable(value = "groupEntityByBotUsername", key = "#username")
+    default Group getByBotUsername(String username) {
+        return findByBotUsername(username).orElse(null);
+    }
+
     @CachePut(value = "groupEntityById", key = "#result.id")
     default Group saveOptional(Group group) {
         clearByOwnerId(group);
+        putByGroupId(group);
+        putByBotToken(group);
+        putByBotUsername(group);
         return save(group);
+    }
+
+    @CachePut(value = "groupEntityByBotUsername", key = "#group.botUsername")
+    default Group putByBotUsername(Group group) {
+        return group;
+    }
+
+    @CachePut(value = "groupEntityByBotToken", key = "#group.botToken")
+    default Group putByBotToken(Group group) {
+        return group;
+    }
+
+    @CachePut(value = "groupEntityGroupId", key = "#group.groupId")
+    default Group putByGroupId(Group group) {
+        return group;
     }
 
     @CacheEvict(value = "groupEntityByOwnerId", key = "#group.adminId")
     default void clearByOwnerId(Group group) {
-
     }
-
-
-    Optional<Group> findByBotToken(String text);
-
-    Optional<Group> findByBotUsername(String username);
 }

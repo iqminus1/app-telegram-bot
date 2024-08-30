@@ -26,7 +26,7 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
     @Override
     public void process(ChatJoinRequest chatJoinRequest) {
         Long groupId = chatJoinRequest.getChat().getId();
-        if (groupRepository.findByGroupId(groupId).isEmpty()) {
+        if (groupRepository.getByGroupId(groupId) == null) {
             return;
         }
 
@@ -43,7 +43,7 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         String languageCode = langService.getLang(chatJoinRequest.getUser().getLanguageCode()).name();
         adminUtils.setUserLang(userId, languageCode);
         adminUtils.setUserLang(userId, languageCode);
-        Group group = groupRepository.findByGroupId(groupId).orElseThrow();
+        Group group = groupRepository.getByGroupId(groupId);
         String message = langService.getMessage(LangFields.PAID_GROUP_TEXT, languageCode);
         sender.sendMessage(userId, message, adminResponseButton.start(group.getId(), languageCode));
     }

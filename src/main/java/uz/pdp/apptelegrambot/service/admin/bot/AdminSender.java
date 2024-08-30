@@ -162,7 +162,7 @@ public class AdminSender extends DefaultAbsSender {
 
     public void deleteInviteLink(Long groupId, String link) {
         try {
-            execute(new RevokeChatInviteLink(groupId.toString(), link));
+            executeAsync(new RevokeChatInviteLink(groupId.toString(), link));
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
@@ -206,5 +206,18 @@ public class AdminSender extends DefaultAbsSender {
 
     public Group getGroup() {
         return groupRepository.getByBotToken(token);
+    }
+
+    public boolean checkGroup(Long userId) {
+        try {
+            execute(new GetChatMember(userId.toString(), getGroup().getGroupId()));
+            return true;
+        } catch (TelegramApiException e) {
+            return false;
+        }
+    }
+
+    public String getLink() {
+        return getLink(getGroup().getGroupId());
     }
 }

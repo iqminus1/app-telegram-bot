@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 @Entity(name = "orders")
-@SQLRestriction("unlimited = false")
 public class Order extends AbsLongEntity implements Serializable {
     private Long userId;
 

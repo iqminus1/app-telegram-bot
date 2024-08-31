@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.groupadministration.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -210,8 +211,8 @@ public class AdminSender extends DefaultAbsSender {
 
     public boolean checkGroup(Long userId) {
         try {
-            execute(new GetChatMember(userId.toString(), getGroup().getGroupId()));
-            return true;
+            ChatMember execute = execute(new GetChatMember(getGroup().getGroupId().toString(), userId));
+            return !execute.getStatus().equals("left");
         } catch (TelegramApiException e) {
             return false;
         }

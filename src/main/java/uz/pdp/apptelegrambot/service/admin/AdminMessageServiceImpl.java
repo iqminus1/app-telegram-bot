@@ -5,17 +5,12 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
-import uz.pdp.apptelegrambot.entity.CodeGroup;
-import uz.pdp.apptelegrambot.entity.Group;
-import uz.pdp.apptelegrambot.entity.Order;
-import uz.pdp.apptelegrambot.entity.ScreenshotGroup;
+import uz.pdp.apptelegrambot.entity.*;
 import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
+import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 import uz.pdp.apptelegrambot.enums.StateEnum;
-import uz.pdp.apptelegrambot.repository.CodeGroupRepository;
-import uz.pdp.apptelegrambot.repository.GroupRepository;
-import uz.pdp.apptelegrambot.repository.OrderRepository;
-import uz.pdp.apptelegrambot.repository.ScreenshotGroupRepository;
+import uz.pdp.apptelegrambot.repository.*;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
@@ -43,6 +38,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     private final AdminResponseText responseText;
     private final AdminTemp temp;
     private final ScreenshotGroupRepository screenshotGroupRepository;
+    private final TariffRepository tariffRepository;
     private final String token;
 
     @Override
@@ -197,8 +193,26 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         Group group = groupRepository.getByBotToken(token);
         if (!group.isScreenShot())
             return;
-
         InlineKeyboardMarkup markup = responseButton.tariffList(group.getId(), AppConstant.SCREENSHOT, userLang);
+        if (markup.getKeyboard().size() == 1) {
+            if (group.getGroupId() == null || group.getCardNumber() == null || group.getCardName() == null) {
+                sender.sendMessage(userId, langService.getMessage(LangFields.SECTION_DONT_WORK_TEXT, userLang), responseButton.start(group.getId(), userLang));
+                return;
+            }
+            List<Tariff> tariffList = tariffRepository.findAllByBotId(group.getId());
+            Tariff tariff = tariffList.get(0);
+            ScreenshotGroup screenshotGroup = new ScreenshotGroup();
+            screenshotGroup.setGroupId(group.getGroupId());
+            screenshotGroup.setStatus(ScreenshotStatus.DONT_SEE);
+            screenshotGroup.setTariffId(tariff.getBotId());
+            screenshotGroup.setTariffPrice(tariff.getPrice());
+            screenshotGroup.setType(tariff.getType());
+            screenshotGroup.setSendUserId(userId);
+            temp.addTempScreenshot(userId, screenshotGroup);
+            String message = langService.getMessage(LangFields.SEND_MONEY_TO_CARD_AND_SEND_SCREENSHOT_TEXT, userLang).formatted(tariff.getPrice(), group.getCardName(), group.getCardNumber());
+            sender.sendMessage(userId, message);
+            return;
+        }
         sender.deleteKeyboard(userId);
         sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_CHOOSE_TARIFF_FOR_JOIN_TEXT, userLang), markup);
     }

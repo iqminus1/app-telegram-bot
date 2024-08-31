@@ -46,7 +46,7 @@ public class AdminController {
         this.adminUtils.put(adminId, adminUtils);
         MyChatMemberService myChatMemberService = new MyChatMemberServiceImpl(groupRepository, sender);
         AdminResponseButton adminResponseButton = new AdminResponseButton(buttonService, groupRepository, langService, tariffRepository, responseText);
-        AdminMessageServiceImpl adminMessageService = new AdminMessageServiceImpl(sender, langService, adminUtils, adminResponseButton, groupRepository, buttonService, codeGroupRepository, orderRepository, adminResponseText, adminTemp, screenshotGroupRepository, token);
+        AdminMessageServiceImpl adminMessageService = new AdminMessageServiceImpl(sender, langService, adminUtils, adminResponseButton, groupRepository, buttonService, codeGroupRepository, orderRepository, adminResponseText, adminTemp, screenshotGroupRepository,tariffRepository, token);
         ChatJoinRequestService chatJoinRequestService = new ChatJoinRequestServiceImpl(sender, orderRepository, langService, adminResponseButton, groupRepository, adminUtils);
         AdminCallbackServiceImpl callbackService = new AdminCallbackServiceImpl(sender, adminResponseButton, langService, adminUtils, tariffRepository, adminTemp);
         AdminProcessService adminProcessService = new AdminProcessServiceImpl(myChatMemberService, chatJoinRequestService, adminMessageService, callbackService);

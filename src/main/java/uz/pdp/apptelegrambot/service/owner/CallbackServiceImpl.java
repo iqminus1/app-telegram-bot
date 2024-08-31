@@ -111,6 +111,13 @@ public class CallbackServiceImpl implements CallbackService {
                     showBotInfo(callbackQuery);
                 }
             }
+            case SENDING_TARIFF_PRICE -> {
+                if (data.startsWith(AppConstant.ADD_TARIFF_DATA)) {
+                    addTariffs(callbackQuery);
+                } else if (data.startsWith(AppConstant.SHOW_PRICE_INFO_DATA)) {
+                    showTariffInfo(callbackQuery);
+                }
+            }
 
         }
     }
@@ -120,8 +127,10 @@ public class CallbackServiceImpl implements CallbackService {
         long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Tariff tariff = tariffRepository.getById(tariffId);
         temp.addTempTariff(userId, tariff);
+        temp.addTempBotId(userId, tariff.getBotId());
         commonUtils.setState(userId, StateEnum.SENDING_TARIFF_PRICE);
-        sender.sendMessage(userId, responseText.getSendExpireText(tariff.getType().ordinal(), commonUtils.getUserLang(userId)));
+        InlineKeyboardMarkup keyboard = buttonService.callbackKeyboard(List.of(Map.of(langService.getMessage(LangFields.BACK_TEXT, commonUtils.getUserLang(userId)), AppConstant.SHOW_PRICE_INFO_DATA + tariffId)));
+        sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), responseText.getSendExpireText(tariff.getType().ordinal(), commonUtils.getUserLang(userId)), keyboard);
     }
 
     private void deleteTariff(CallbackQuery callbackQuery) {
@@ -139,13 +148,16 @@ public class CallbackServiceImpl implements CallbackService {
         Tariff tariff = new Tariff(botId, ExpireType.values()[ordinal], null);
         Long userId = callbackQuery.getFrom().getId();
         temp.addTempTariff(userId, tariff);
+        temp.addTempBotId(userId, botId);
         commonUtils.setState(userId, StateEnum.SENDING_TARIFF_PRICE);
-        sender.sendMessageAndRemove(userId, responseText.getSendExpireText(ordinal, commonUtils.getUserLang(userId)));
+        InlineKeyboardMarkup keyboard = buttonService.callbackKeyboard(List.of(Map.of(langService.getMessage(LangFields.BACK_TEXT, commonUtils.getUserLang(userId)), AppConstant.ADD_TARIFF_DATA + botId)));
+        sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), responseText.getSendExpireText(ordinal, commonUtils.getUserLang(userId)), keyboard);
     }
 
     private void addTariffs(CallbackQuery callbackQuery) {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Long userId = callbackQuery.getFrom().getId();
+        commonUtils.setState(userId, StateEnum.START);
         InlineKeyboardMarkup markup = responseButton.addTariff(userId, botId);
         sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), langService.getMessage(LangFields.SELECT_CHOOSE_TEXT, commonUtils.getUserLang(userId)), markup);
     }
@@ -153,6 +165,8 @@ public class CallbackServiceImpl implements CallbackService {
     private void showTariffInfo(CallbackQuery callbackQuery) {
         long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Long userId = callbackQuery.getFrom().getId();
+        temp.clearTemp(userId);
+        commonUtils.setState(userId, StateEnum.START);
         String userLang = commonUtils.getUserLang(userId);
         InlineKeyboardMarkup markup = responseButton.showTariffInfo(userLang, tariffId);
         sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), langService.getMessage(LangFields.SELECT_CHOOSE_TEXT, userLang), markup);

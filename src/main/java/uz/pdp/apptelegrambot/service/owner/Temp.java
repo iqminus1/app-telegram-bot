@@ -55,6 +55,9 @@ public class Temp {
     }
 
     public long getTempBotId(long userId) {
-        return tempBotId.get(userId);
+        if (tempBotId.containsKey(userId)) {
+            return tempBotId.get(userId);
+        }
+        return 0;
     }
 }

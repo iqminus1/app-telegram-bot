@@ -41,7 +41,7 @@ public class AdminCallbackServiceImpl implements AdminCallbackService {
             sender.sendMessage(userId, langService.getMessage(LangFields.YOU_HAVE_THIS_CHANNEL_TEXT, userLang));
             return;
         }
-        sender.sendMessage(userId,langService.getMessage(LangFields.SEND_VALID_ORDER_TEXT,userLang)+" "+sender.getLink());
+        sender.sendMessage(userId, langService.getMessage(LangFields.SEND_VALID_ORDER_TEXT, userLang) + " " + sender.getLink());
     }
 
     private void sendTextScreenshot(CallbackQuery callbackQuery) {

@@ -170,12 +170,22 @@ public class MessageServiceImpl implements MessageService {
         temp.removeTempTariff(tariff.getType().ordinal(), userId);
         tariffRepository.saveOptional(tariff);
         if (tempTariffs.isEmpty()) {
-            temp.clearTemp(userId);
             commonUtils.setState(userId, StateEnum.START);
-            sender.sendMessage(userId, langService.getMessage(LangFields.SUCCESSFULLY_ADDED_TARIFF_PRICE_TEXT, userLang), responseButton.start(userLang));
+            String sendMessage = langService.getMessage(LangFields.SUCCESSFULLY_ADDED_TARIFF_PRICE_TEXT, userLang);
+            long tempBotId = temp.getTempBotId(userId);
+            if (tempBotId == 0) {
+                sender.sendMessage(userId, sendMessage, responseButton.start(userLang));
+                return;
+            }
+            sender.sendMessage(userId, sendMessage, responseButton.showTariffs(tempBotId, userId, AppConstant.SHOW_PRICE_INFO_DATA));
             return;
         }
         sender.sendMessage(userId, responseText.getSendExpireText(tempTariffs.get(0).getType().ordinal(), userLang));
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setUserContactNumber(Message message) {

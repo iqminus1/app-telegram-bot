@@ -23,7 +23,9 @@ import uz.pdp.apptelegrambot.utils.AppConstant;
 import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 import static uz.pdp.apptelegrambot.utils.AppConstant.updateOrderExpire;
@@ -94,12 +96,21 @@ public class AdminMessageServiceImpl implements AdminMessageService {
             return;
         }
         Order order = optionalOrder.get();
-        if (order.getExpireDay().isAfter(LocalDateTime.now())) {
-            InlineKeyboardMarkup button = buttonService.callbackKeyboard(List.of(Map.of(langService.getMessage(LangFields.GET_LINK_FOR_JOIN_TEXT, userLang), AppConstant.GET_LINK_FOR_JOIN_DATA + group.getId())));
-            sender.sendMessage(userId, langService.getMessage(LangFields.SHOW_NON_EXPIRE_ORDER_INFO_TEXT, userLang), button);
+        InlineKeyboardMarkup button = buttonService.callbackKeyboard(List.of(Map.of(langService.getMessage(LangFields.GET_LINK_FOR_JOIN_TEXT, userLang), AppConstant.GET_LINK_FOR_JOIN_DATA + group.getId())));
+
+        if (order.isUnlimited()) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.UNLIMITED_ORDER_TARIFF_TEXT, userLang), button);
             return;
         }
-        sender.sendMessage(userId, langService.getMessage(LangFields.SHOW_EXPIRE_ORDER_INFO_TEXT, userLang));
+        LocalDate localDate = order.getExpireDay().toLocalDate();
+        LocalTime localTime = order.getExpireDay().toLocalTime();
+        String date = localDate.getYear() + "/" + localDate.getMonth() + "/" + localDate.getDayOfMonth();
+        String time = localTime.getHour() + ":" + localTime.getMinute() + ":" + localTime.getSecond();
+        if (order.getExpireDay().isAfter(LocalDateTime.now())) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.SHOW_NON_EXPIRE_ORDER_INFO_TEXT, userLang).formatted(date, time), button);
+            return;
+        }
+        sender.sendMessage(userId, langService.getMessage(LangFields.SHOW_EXPIRE_ORDER_INFO_TEXT, userLang).formatted(date, time));
 
     }
 

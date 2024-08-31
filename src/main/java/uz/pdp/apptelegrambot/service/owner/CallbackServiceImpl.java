@@ -11,6 +11,7 @@ import uz.pdp.apptelegrambot.enums.LangFields;
 import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 import uz.pdp.apptelegrambot.enums.StateEnum;
 import uz.pdp.apptelegrambot.repository.*;
+import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.AdminController;
 import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
@@ -21,6 +22,7 @@ import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -42,6 +44,7 @@ public class CallbackServiceImpl implements CallbackService {
     private final ScreenshotGroupRepository screenshotGroupRepository;
     private final OrderRepository orderRepository;
     private final AdminController adminController;
+    private final ButtonService buttonService;
 
     @Override
     public void process(CallbackQuery callbackQuery) {
@@ -103,13 +106,19 @@ public class CallbackServiceImpl implements CallbackService {
                     changeTariffStatus(userId, data, callbackQuery);
                 }
             }
+            case SENDING_CARD_NUMBER -> {
+                if (data.startsWith(AppConstant.BACK_TO_BOT_INFO_DATA)) {
+                    showBotInfo(callbackQuery);
+                }
+            }
+
         }
     }
 
     private void changeTariffPrice(CallbackQuery callbackQuery) {
         Long userId = callbackQuery.getFrom().getId();
         long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Tariff tariff =tariffRepository.getById(tariffId);
+        Tariff tariff = tariffRepository.getById(tariffId);
         temp.addTempTariff(userId, tariff);
         commonUtils.setState(userId, StateEnum.SENDING_TARIFF_PRICE);
         sender.sendMessage(userId, responseText.getSendExpireText(tariff.getType().ordinal(), commonUtils.getUserLang(userId)));
@@ -117,7 +126,7 @@ public class CallbackServiceImpl implements CallbackService {
 
     private void deleteTariff(CallbackQuery callbackQuery) {
         long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Tariff tariff =tariffRepository.getById(tariffId);
+        Tariff tariff = tariffRepository.getById(tariffId);
         tariffRepository.deleteAndClearCache(tariff);
         callbackQuery.setData(":" + tariff.getBotId());
         showTariffList(callbackQuery);
@@ -270,12 +279,13 @@ public class CallbackServiceImpl implements CallbackService {
     private void addCardNumber(CallbackQuery callbackQuery) {
         Long userId = callbackQuery.getFrom().getId();
         Integer messageId = callbackQuery.getMessage().getMessageId();
-        sender.deleteMessage(userId, messageId);
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         temp.addTempGroup(groupRepository.findById(botId).orElseThrow());
         temp.addTempBotId(userId, botId);
-        String message = langService.getMessage(LangFields.SEND_CARD_NUMBER_TEXT, commonUtils.getUserLang(userId));
-        sender.sendMessageAndRemove(userId, message);
+        String userLang = commonUtils.getUserLang(userId);
+        String message = langService.getMessage(LangFields.SEND_CARD_NUMBER_TEXT, userLang);
+        InlineKeyboardMarkup keyboard = buttonService.callbackKeyboard(List.of(Map.of(langService.getMessage(LangFields.BACK_TEXT, userLang), AppConstant.BACK_TO_BOT_INFO_DATA + botId)));
+        sender.changeTextAndKeyboard(userId, messageId, message, keyboard);
         commonUtils.setState(userId, StateEnum.SENDING_CARD_NUMBER);
     }
 
@@ -284,8 +294,8 @@ public class CallbackServiceImpl implements CallbackService {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Group group = groupRepository.getByIdDefault(botId);
         String userLang = commonUtils.getUserLang(userId);
-        if (group.getGroupId()==null) {
-            sender.sendMessage(userId,langService.getMessage(LangFields.FIRST_ADD_GROUP_TEXT,userLang));
+        if (group.getGroupId() == null) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.FIRST_ADD_GROUP_TEXT, userLang));
             return;
         }
         List<ScreenshotGroup> screenshots = screenshotGroupRepository.findAllByGroupIdAndStatus(group.getGroupId(), ScreenshotStatus.DONT_SEE);
@@ -305,7 +315,7 @@ public class CallbackServiceImpl implements CallbackService {
 
     private void generateCode(CallbackQuery callbackQuery) {
         long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Tariff tariff =tariffRepository.getById(tariffId);
+        Tariff tariff = tariffRepository.getById(tariffId);
         Group group = groupRepository.findById(tariff.getBotId()).orElseThrow();
         if (!group.isCode()) {
             return;
@@ -367,6 +377,8 @@ public class CallbackServiceImpl implements CallbackService {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Group group = groupRepository.getByIdDefault(botId);
         Long userId = callbackQuery.getFrom().getId();
+        commonUtils.setState(userId, StateEnum.START);
+        temp.clearTemp(userId);
         String userLang = commonUtils.getUserLang(userId);
         String message = langService.getMessage(LangFields.BOT_INFO_TEXT, userLang).formatted(group.getBotUsername(), group.getName());
         InlineKeyboardMarkup markup = responseButton.botInfo(botId, userLang);

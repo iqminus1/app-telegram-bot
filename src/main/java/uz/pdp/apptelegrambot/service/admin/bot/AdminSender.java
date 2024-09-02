@@ -16,7 +16,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.pdp.apptelegrambot.entity.Group;
-import uz.pdp.apptelegrambot.entity.Order;
 import uz.pdp.apptelegrambot.repository.GroupRepository;
 import uz.pdp.apptelegrambot.utils.AppConstant;
 
@@ -27,7 +26,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -52,13 +50,6 @@ public class AdminSender extends DefaultAbsSender {
             execute(new UnbanChatMember(groupId.toString(), userId));
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    @Async
-    public void kickUsers(List<Order> orders) {
-        for (Order order : orders) {
-            kickUser(order.getUserId(), order.getGroupId());
         }
     }
 

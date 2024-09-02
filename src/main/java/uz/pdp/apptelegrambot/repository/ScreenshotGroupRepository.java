@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 public interface ScreenshotGroupRepository extends JpaRepository<ScreenshotGroup, Long> {
     ConcurrentMap<Long, ScreenshotGroup> byId = new ConcurrentHashMap<>();
 
-    default ScreenshotGroup getById(Long id) {
+    default ScreenshotGroup getById(long id) {
         if (byId.containsKey(id)) {
             return byId.get(id);
         }
@@ -24,14 +24,10 @@ public interface ScreenshotGroupRepository extends JpaRepository<ScreenshotGroup
     List<ScreenshotGroup> findAllByGroupIdAndStatus(Long groupId, ScreenshotStatus status);
 
 
-    default ScreenshotGroup saveOptional(ScreenshotGroup screenshotGroup) {
+    default void saveOptional(ScreenshotGroup screenshotGroup) {
         ScreenshotGroup save = save(screenshotGroup);
-        byId.put(screenshotGroup.getId(), screenshotGroup);
-        return save;
+        byId.put(screenshotGroup.getId(), save);
     }
-
-
-
 
 
 }

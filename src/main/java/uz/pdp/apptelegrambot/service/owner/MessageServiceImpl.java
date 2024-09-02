@@ -195,7 +195,7 @@ public class MessageServiceImpl implements MessageService {
             String phoneNumber = message.getContact().getPhoneNumber();
             User user = commonUtils.getUser(userId);
             user.setContactNumber(phoneNumber);
-            userRepository.saveOptional(user);
+            userRepository.save(user);
             sendAddBotText(user.getId(), user);
             return;
         }

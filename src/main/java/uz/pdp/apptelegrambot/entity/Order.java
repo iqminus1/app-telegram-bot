@@ -2,7 +2,6 @@ package uz.pdp.apptelegrambot.entity;
 
 import jakarta.persistence.Entity;
 import lombok.*;
-import org.hibernate.annotations.SQLRestriction;
 import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
 
 import java.io.Serializable;

@@ -27,7 +27,7 @@ public class Temp {
     }
 
     public Group getTempGroup(Long userId) {
-        return tempGroup.get(userId);
+        return tempGroup.getOrDefault(userId, null);
     }
 
     public void addTempTariff(Long userId, Tariff tariff) {
@@ -55,9 +55,7 @@ public class Temp {
     }
 
     public long getTempBotId(long userId) {
-        if (tempBotId.containsKey(userId)) {
-            return tempBotId.get(userId);
-        }
-        return 0;
+
+        return tempBotId.getOrDefault(userId, 0L);
     }
 }

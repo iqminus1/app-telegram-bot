@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    List<Order> findAllByExpireDayBeforeAndUnlimited(LocalDateTime expireDay, boolean unlimited);
+    List<Order> findAllByExpireDayAfterAndExpireDayBeforeAndUnlimited(LocalDateTime after, LocalDateTime before, boolean unlimited);
 
     Optional<Order> findByUserIdAndGroupId(Long userId, Long groupId);
 }

@@ -32,7 +32,7 @@ public class AdminScheduledProcess {
     @Scheduled(cron = "0 0 4 * * ?")
     public void kickUsersFromGroups() {
         LocalDateTime now = LocalDateTime.now();
-        List<Order> orders = orderRepository.findAllByExpireDayBeforeAndUnlimited(LocalDateTime.now().plusDays(5).plusMinutes(1), false);
+        List<Order> orders = orderRepository.findAllByExpireDayAfterAndExpireDayBeforeAndUnlimited(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(5).plusMinutes(1), false);
         kickUsers(orders, now);
         sendUsersExpire(orders, now);
     }

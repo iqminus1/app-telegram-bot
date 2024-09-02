@@ -32,7 +32,7 @@ public class CommonUtils {
             users.put(userId, optional.get());
             return optional.get();
         }
-        User user = userRepository.saveOptional(new User(userId, StateEnum.START, null));
+        User user = userRepository.save(new User(userId, StateEnum.START, null));
         users.put(userId, user);
         return user;
     }
@@ -75,7 +75,7 @@ public class CommonUtils {
     void saveUsers() {
         for (Long userId : users.keySet()) {
             User user = users.get(userId);
-            userRepository.saveOptional(user);
+            userRepository.save(user);
         }
         users.clear();
     }

@@ -114,6 +114,9 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         Long userId = message.getFrom().getId();
         ScreenshotGroup tempScreenshot = temp.getTempScreenshot(userId);
         List<PhotoSize> photo = message.getPhoto();
+        if (photo.isEmpty()) {
+            return;
+        }
         PhotoSize photoSize = photo.stream().max(Comparator.comparing(PhotoSize::getFileSize)).get();
         String filePath = sender.getFilePath(photoSize);
         tempScreenshot.setPath(filePath);
@@ -209,7 +212,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
             screenshotGroup.setType(tariff.getType());
             screenshotGroup.setSendUserId(userId);
             temp.addTempScreenshot(userId, screenshotGroup);
-            adminUtils.setUserState(userId,StateEnum.SENDING_JOIN_REQ_SCREENSHOT);
+            adminUtils.setUserState(userId, StateEnum.SENDING_JOIN_REQ_SCREENSHOT);
             String message = langService.getMessage(LangFields.SEND_MONEY_TO_CARD_AND_SEND_SCREENSHOT_TEXT, userLang).formatted(tariff.getPrice(), group.getCardName(), group.getCardNumber());
             sender.sendMessageAndRemove(userId, message);
             return;

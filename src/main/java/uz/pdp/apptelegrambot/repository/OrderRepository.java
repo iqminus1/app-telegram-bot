@@ -14,6 +14,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByExpireDayBeforeAndUnlimited(LocalDateTime expireDay, boolean unlimited);
 
     Optional<Order> findByUserIdAndGroupId(Long userId, Long groupId);
-
-    Order save(Order order);
 }

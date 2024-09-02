@@ -15,7 +15,7 @@ public class DataLoader implements CommandLineRunner {
     private final AdminController adminController;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         groupsManage();
     }
 

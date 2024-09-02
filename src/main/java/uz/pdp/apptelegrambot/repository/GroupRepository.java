@@ -68,14 +68,13 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
         return getByBotUsername(username);
     }
 
-    default Group saveOptional(Group group) {
+    default void saveOptional(Group group) {
         Group savedGroup = save(group);
         putById(savedGroup);
         putByGroupId(savedGroup);
         putByBotToken(savedGroup);
         putByBotUsername(savedGroup);
         putAllByAdminId(savedGroup);
-        return savedGroup;
     }
 
     @Async

@@ -101,7 +101,7 @@ public class ResponseButton {
     }
 
     public InlineKeyboardMarkup botsList(Long userId) {
-        List<Group> groups = groupRepository.findAllByAdminId(userId);
+        List<Group> groups = groupRepository.findAllByAdminIdDefault(userId);
         List<Map<String, String>> list = new ArrayList<>();
         for (Group group : groups) {
             list.add(Map.of("@" + group.getBotUsername(), AppConstant.BOT_DATA + group.getId()));
@@ -130,7 +130,7 @@ public class ResponseButton {
 
     public InlineKeyboardMarkup showTariffs(long botId, long userId, String data) {
         String userLang = commonUtils.getUserLang(userId);
-        List<Tariff> tariffs = tariffRepository.findAllByBotId(botId);
+        List<Tariff> tariffs = tariffRepository.findAllByBotIdDefault(botId);
         tariffs.sort(Comparator.comparing(t -> t.getType().ordinal()));
         List<Map<String, String>> list = new ArrayList<>();
         for (Tariff tariff : tariffs) {
@@ -185,7 +185,7 @@ public class ResponseButton {
     }
 
     public InlineKeyboardMarkup addTariff(Long userId, Long botId) {
-        List<Integer> ordinals = tariffRepository.findAllByBotId(botId).stream().map(t -> t.getType().ordinal()).toList();
+        List<Integer> ordinals = tariffRepository.findAllByBotIdDefault(botId).stream().map(t -> t.getType().ordinal()).toList();
         List<Map<String, String>> list = new ArrayList<>();
         String userLang = commonUtils.getUserLang(userId);
         if (!ordinals.contains(0)) {

@@ -50,7 +50,7 @@ public class AdminResponseButton {
     }
 
     public InlineKeyboardMarkup tariffList(Long botId, String data, String userLang) {
-        List<Tariff> tariffs = tariffRepository.findAllByBotId(botId);
+        List<Tariff> tariffs = tariffRepository.findAllByBotIdDefault(botId);
         if (tariffs.isEmpty()) {
             return null;
         }

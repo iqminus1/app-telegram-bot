@@ -136,7 +136,7 @@ public class CallbackServiceImpl implements CallbackService {
     private void deleteTariff(CallbackQuery callbackQuery) {
         long tariffId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Tariff tariff = tariffRepository.getById(tariffId);
-        tariffRepository.deleteAndClearCache(tariff);
+        tariffRepository.deleteDefault(tariff);
         callbackQuery.setData(":" + tariff.getBotId());
         showTariffList(callbackQuery);
     }
@@ -358,7 +358,7 @@ public class CallbackServiceImpl implements CallbackService {
 
     private void showTariffsForGenerateCode(CallbackQuery callbackQuery) {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        if (tariffRepository.findAllByBotId(botId).isEmpty()) {
+        if (tariffRepository.findAllByBotIdDefault(botId).isEmpty()) {
             return;
         }
         long userId = callbackQuery.getFrom().getId();

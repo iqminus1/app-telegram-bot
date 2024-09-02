@@ -124,7 +124,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private void sendListBots(Long userId) {
-        List<Group> groups = groupRepository.findAllByAdminId(userId);
+        List<Group> groups = groupRepository.findAllByAdminIdDefault(userId);
         String userLang = commonUtils.getUserLang(userId);
         if (groups.isEmpty()) {
             sender.sendMessage(userId, langService.getMessage(LangFields.DONT_HAVE_ANY_BOT_TEXT, userLang));

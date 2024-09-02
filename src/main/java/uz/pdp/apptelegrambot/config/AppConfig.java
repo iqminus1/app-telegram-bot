@@ -10,7 +10,7 @@ public class AppConfig {
     @Bean
     public ResourceBundleMessageSource messageSourceResourceBundle() {
         ResourceBundleMessageSource resourceBundleMessageSource = new ResourceBundleMessageSource();
-        resourceBundleMessageSource.setBasename("messages");
+        resourceBundleMessageSource.setBasename("classpath:messages");
         resourceBundleMessageSource.setFallbackToSystemLocale(false);
         resourceBundleMessageSource.setDefaultEncoding(CharEncoding.UTF_8);
         return resourceBundleMessageSource;

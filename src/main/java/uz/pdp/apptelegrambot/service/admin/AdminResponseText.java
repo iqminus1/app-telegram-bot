@@ -18,7 +18,7 @@ public class AdminResponseText {
     private final ResponseText responseText;
 
     public Map<String, String> getPaymentData(String lang, Long botId, Long userId) {
-        List<Tariff> tariffs = tariffRepository.findAllByBotId(botId);
+        List<Tariff> tariffs = tariffRepository.findAllByBotIdDefault(botId);
         if (tariffs.isEmpty()) {
             return null;
         }

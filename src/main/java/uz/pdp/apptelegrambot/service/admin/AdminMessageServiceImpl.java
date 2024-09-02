@@ -100,7 +100,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
         }
         LocalDate localDate = order.getExpireDay().toLocalDate();
         LocalTime localTime = order.getExpireDay().toLocalTime();
-        String date = localDate.getYear() + "/" + localDate.getMonth() + "/" + localDate.getDayOfMonth();
+        String date = localDate.getYear() + "-" + localDate.getMonth().getValue() + "-" + localDate.getDayOfMonth();
         String time = localTime.getHour() + ":" + localTime.getMinute() + ":" + localTime.getSecond();
         if (order.getExpireDay().isAfter(LocalDateTime.now())) {
             sender.sendMessage(userId, langService.getMessage(LangFields.SHOW_NON_EXPIRE_ORDER_INFO_TEXT, userLang).formatted(date, time), button);
@@ -199,7 +199,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                 sender.sendMessage(userId, langService.getMessage(LangFields.SECTION_DONT_WORK_TEXT, userLang), responseButton.start(group.getId(), userLang));
                 return;
             }
-            List<Tariff> tariffList = tariffRepository.findAllByBotId(group.getId());
+            List<Tariff> tariffList = tariffRepository.findAllByBotIdDefault(group.getId());
             Tariff tariff = tariffList.get(0);
             ScreenshotGroup screenshotGroup = new ScreenshotGroup();
             screenshotGroup.setGroupId(group.getGroupId());

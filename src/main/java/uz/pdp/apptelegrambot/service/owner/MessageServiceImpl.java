@@ -95,6 +95,8 @@ public class MessageServiceImpl implements MessageService {
         commonUtils.setState(userId, StateEnum.START);
         String userLang = commonUtils.getUserLang(userId);
         String sendText = langService.getMessage(LangFields.BOT_INFO_TEXT, userLang).formatted(tempGroup.getBotUsername(), tempGroup.getName());
+        if (tempGroup.getName() == null)
+            sendText = langService.getMessage(LangFields.BOT_INFO_NULL_TEXT, userLang).formatted(tempGroup.getBotUsername());
         sender.sendMessage(userId, sendText, responseButton.botInfo(temp.getTempBotId(userId), userLang));
         temp.clearTemp(userId);
     }

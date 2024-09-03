@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.Order;
 import uz.pdp.apptelegrambot.enums.LangFields;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -35,6 +37,33 @@ public class AdminScheduledProcess {
         List<Order> orders = orderRepository.findAllByExpireDayAfterAndExpireDayBeforeAndUnlimited(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(5).plusMinutes(1), false);
         kickUsers(orders, now);
         sendUsersExpire(orders, now);
+        sendBuyingText();
+    }
+
+    private void sendBuyingText() {
+        Map<Long, AdminSender> adminSenders = adminController.getAdminSenders();
+        for (Long adminId : adminSenders.keySet()) {
+            AdminUtils adminUtils = adminController.getAdminUtils(adminId);
+            AdminSender adminSender = adminSenders.get(adminId);
+            Group group = adminSender.getGroup();
+            for (byte i = 2; i >= 0; i--) {
+                Set<Long> sendingMessage = adminUtils.getSendingMessage(i);
+                for (Long userId : sendingMessage) {
+                    String userLang = adminUtils.getUserLang(userId);
+                    Chat chat = adminSender.getChat(group.getGroupId());
+                    if (chat.getType().equals("channel")) {
+                        String message = langService.getMessage(LangFields.YOU_ARE_SENT_JOIN_REQ_FOR_CHANNEL_TEXT, userLang).formatted(group.getName());
+                        adminSender.sendMessage(userId, message);
+                    } else if (chat.getType().equals("group")) {
+                        String message = langService.getMessage(LangFields.YOU_ARE_SENT_JOIN_REQ_FOR_GROUP_TEXT, userLang).formatted(group.getName());
+                        adminSender.sendMessage(userId, message);
+                    }
+                }
+                adminUtils.updateSendingMessage((byte) (i + 1), i, sendingMessage);
+            }
+            adminUtils.remove((byte) 3);
+        }
+
     }
 
     @Async
@@ -51,7 +80,7 @@ public class AdminScheduledProcess {
                 AdminUtils adminUtils = adminController.getAdminUtils(group.getAdminId());
                 expiredOrders.forEach(or -> {
                     sender.kickUser(or.getUserId(), or.getGroupId());
-                    sender.sendMessage(or.getUserId(), langService.getMessage(LangFields.YOU_ARE_KICKED_AT_CHANNEL_TEXT, adminUtils.getUserLang(or.getUserId())));
+                    sender.sendMessage(or.getUserId(), langService.getMessage(LangFields.YOU_ARE_KICKED_AT_CHANNEL_TEXT, adminUtils.getUserLang(or.getUserId()).formatted(group.getName())));
                 });
             }
         }
@@ -74,8 +103,15 @@ public class AdminScheduledProcess {
                 List<Order> ordersToNotify = ordersByGroup.get(groupId);
                 ordersToNotify.forEach(order -> {
                     long daysUntilExpire = ChronoUnit.DAYS.between(now.toLocalDate(), order.getExpireDay().toLocalDate());
-                    sender.sendMessage(order.getUserId(),
-                            langService.getMessage(LangFields.EXPIRE_AT_TEXT, adminUtils.getUserLang(order.getUserId())).formatted(daysUntilExpire));
+                    Chat chat = sender.getChat(groupId);
+                    if (chat.getType().equals("channel")) {
+                        String text = langService.getMessage(LangFields.EXPIRE_AT_CHANNEL_TEXT, adminUtils.getUserLang(order.getUserId())).formatted(group.getName(), daysUntilExpire);
+                        sender.sendMessage(order.getUserId(), text);
+                    } else if (chat.getType().equals("group")) {
+                        String text = langService.getMessage(LangFields.EXPIRE_AT_GROUP_TEXT, adminUtils.getUserLang(order.getUserId())).formatted(group.getName(), daysUntilExpire);
+                        sender.sendMessage(order.getUserId(), text);
+                    }
+
                 });
             }
         }

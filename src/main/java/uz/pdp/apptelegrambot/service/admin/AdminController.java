@@ -68,6 +68,10 @@ public class AdminController {
 
     }
 
+    public Map<Long, AdminSender> getAdminSenders() {
+        return adminSender;
+    }
+
     public AdminSender getSenderByAdminId(long adminId) {
         if (adminSender.containsKey(adminId)) {
             return adminSender.get(adminId);

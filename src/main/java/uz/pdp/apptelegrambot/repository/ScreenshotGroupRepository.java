@@ -6,19 +6,12 @@ import uz.pdp.apptelegrambot.entity.ScreenshotGroup;
 import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 @Repository
 public interface ScreenshotGroupRepository extends JpaRepository<ScreenshotGroup, Long> {
-    ConcurrentMap<Long, ScreenshotGroup> byId = new ConcurrentHashMap<>();
 
     default ScreenshotGroup getById(long id) {
-        if (byId.containsKey(id)) {
-            return byId.get(id);
-        }
-        byId.put(id, findById(id).orElseThrow());
-        return getById(id);
+        return findById(id).orElseThrow();
     }
 
     List<ScreenshotGroup> findAllByGroupIdAndStatus(Long groupId, ScreenshotStatus status);
@@ -26,7 +19,6 @@ public interface ScreenshotGroupRepository extends JpaRepository<ScreenshotGroup
 
     default void saveOptional(ScreenshotGroup screenshotGroup) {
         ScreenshotGroup save = save(screenshotGroup);
-        byId.put(screenshotGroup.getId(), save);
     }
 
 

@@ -19,7 +19,7 @@ public class ActivateController {
                           @RequestParam(required = false) Integer month,
                           @RequestParam(required = false) Integer year,
                           @RequestParam(required = false) Boolean payment) {
-        Group group = groupRepository.getByBotUsername(username);
+        Group group = groupRepository.getByBotUsernameIgnoreCase(username);
         if (group == null) {
             throw new RuntimeException("group not found by username -> " + username);
         }

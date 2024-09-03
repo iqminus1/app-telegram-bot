@@ -212,4 +212,33 @@ public class AdminSender extends DefaultAbsSender {
     public String getLink() {
         return getLink(getGroup().getGroupId());
     }
+
+    public Chat getChat(Long userId) {
+        try {
+            return execute(new GetChat(userId.toString()));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendMessageWithMarkdown(Long userId, String text) {
+        SendMessage sendMessage = new SendMessage(userId.toString(), text);
+        sendMessage.setParseMode("Markdown");
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendMessageWithMarkdownAndRemoveKey(Long userId, String message) {
+        SendMessage sendMessage = new SendMessage(userId.toString(), message);
+        sendMessage.setParseMode("Markdown");
+        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

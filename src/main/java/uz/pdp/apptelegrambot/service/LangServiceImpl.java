@@ -24,11 +24,11 @@ public class LangServiceImpl implements LangService {
 
     @Override
     public LangEnum getLanguageEnum(String text) {
-        if (text.equals(getMessage(LangFields.BUTTON_LANGUAGE_UZBEK, "Uz"))) {
+        if (text.equals(getMessage(LangFields.BUTTON_LANGUAGE_UZBEK, "uz"))) {
             return LangEnum.UZ;
-        } else if (text.equals(getMessage(LangFields.BUTTON_LANGUAGE_RUSSIAN, "Uz"))) {
+        } else if (text.equals(getMessage(LangFields.BUTTON_LANGUAGE_RUSSIAN, "uz"))) {
             return LangEnum.RU;
-        } else if (text.equals(getMessage(LangFields.BUTTON_LANGUAGE_ENGLISH, "Uz"))) {
+        } else if (text.equals(getMessage(LangFields.BUTTON_LANGUAGE_ENGLISH, "uz"))) {
             return LangEnum.ENG;
         }
         return null;

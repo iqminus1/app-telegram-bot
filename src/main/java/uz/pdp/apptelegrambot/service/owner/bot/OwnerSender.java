@@ -37,6 +37,16 @@ public class OwnerSender extends DefaultAbsSender {
         sendMessage(userId, text, null);
     }
 
+    public void sendMessageWithMarkdown(Long userId, String text) {
+        SendMessage sendMessage = new SendMessage(userId.toString(), text);
+        sendMessage.setParseMode("Markdown");
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void sendMessageAndRemove(Long userId, String text) {
         sendMessage(userId, text, new ReplyKeyboardRemove(true));
     }

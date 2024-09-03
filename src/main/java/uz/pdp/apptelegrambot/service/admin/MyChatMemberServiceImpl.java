@@ -39,6 +39,7 @@ public class MyChatMemberServiceImpl implements MyChatMemberService {
                 if (group != null) {
                     if (group.getGroupId().equals(groupId)) {
                         group.setGroupId(null);
+                        group.setName(null);
                         groupRepository.saveOptional(group);
                     }
                 }

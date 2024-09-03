@@ -41,10 +41,14 @@ public class ChatJoinRequestServiceImpl implements ChatJoinRequestService {
         }
         sender.openChat(userId, groupId);
         String languageCode = langService.getLang(chatJoinRequest.getUser().getLanguageCode()).name();
-        adminUtils.setUserLang(userId, languageCode);
-        adminUtils.setUserLang(userId, languageCode);
+        if (!adminUtils.hasUserLang(userId)) {
+            adminUtils.setUserLang(userId, languageCode);
+        }
+        languageCode = adminUtils.getUserLang(userId);
         Group group = groupRepository.getByGroupId(groupId);
-        String message = langService.getMessage(LangFields.PAID_GROUP_TEXT, languageCode);
+        byte attempt = 0;
+        adminUtils.putSendingMessage(attempt, userId);
+        String message = langService.getMessage(LangFields.PAID_GROUP_TEXT, languageCode).formatted(group.getName());
         sender.sendMessage(userId, message, adminResponseButton.start(group.getId(), languageCode));
     }
 }

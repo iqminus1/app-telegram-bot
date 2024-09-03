@@ -214,7 +214,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
             temp.addTempScreenshot(userId, screenshotGroup);
             adminUtils.setUserState(userId, StateEnum.SENDING_JOIN_REQ_SCREENSHOT);
             String message = langService.getMessage(LangFields.SEND_MONEY_TO_CARD_AND_SEND_SCREENSHOT_TEXT, userLang).formatted(tariff.getPrice(), group.getCardName(), group.getCardNumber());
-            sender.sendMessageAndRemove(userId, message);
+            sender.sendMessageWithMarkdownAndRemoveKey(userId, message);
             return;
         }
         sender.deleteKeyboard(userId);

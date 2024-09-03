@@ -21,11 +21,10 @@ import uz.pdp.apptelegrambot.utils.AppConstant;
 import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.time.LocalTime;
+import java.util.*;
 
 import static uz.pdp.apptelegrambot.utils.AppConstant.updateOrderExpire;
 
@@ -90,6 +89,8 @@ public class CallbackServiceImpl implements CallbackService {
                     changeStatusScreenshot(callbackQuery);
                 } else if (data.startsWith(AppConstant.CHANGE_CODE_STATUS_DATA)) {
                     changeStatusCode(callbackQuery);
+                } else if (data.startsWith(AppConstant.SHOW_ADMIN_ORDER_INFO_DATA)) {
+                    showAdminOrderInfo(callbackQuery);
                 } else if (data.startsWith(AppConstant.BACK_TO_TARIFFS_DATA)) {
                     showTariffList(callbackQuery);
                 } else if (data.equals(AppConstant.BACK_TO_BOT_LIST_DATA)) {
@@ -121,6 +122,26 @@ public class CallbackServiceImpl implements CallbackService {
             }
 
         }
+    }
+
+    private void showAdminOrderInfo(CallbackQuery callbackQuery) {
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        Group group = groupRepository.getByIdDefault(botId);
+        LocalDateTime expireAt = group.getExpireAt();
+        Long userId = callbackQuery.getFrom().getId();
+        String userLang = commonUtils.getUserLang(group.getAdminId());
+        if (expireAt.isAfter(LocalDateTime.now())) {
+            String message = langService.getMessage(LangFields.ADMIN_PERMISSION_EXPIRED_TEXT, userLang);
+            sender.sendMessage(userId, message, responseButton.backToBotInfo(userLang, botId));
+            return;
+        }
+        LocalDate localDate = expireAt.toLocalDate();
+        LocalTime localTime = expireAt.toLocalTime();
+        String date = localDate.getYear() + "-" + localDate.getMonth().getValue() + "-" + localDate.getDayOfMonth();
+        String time = localTime.getHour() + ":" + localTime.getMinute() + ":" + localTime.getSecond();
+        String message = langService.getMessage(LangFields.ADMIN_PERMISSION_EXPIRE_AT_TEXT, userLang).formatted(date, time);
+        sender.sendMessage(userId, message, responseButton.backToBotInfo(userLang, botId));
+
     }
 
     private void changeTariffPrice(CallbackQuery callbackQuery) {
@@ -177,9 +198,14 @@ public class CallbackServiceImpl implements CallbackService {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Group group = groupRepository.getByIdDefault(botId);
         if (group.isAllowPayment()) {
-            group.setClick(!group.isClick());
-            groupRepository.saveOptional(group);
-            showPaymentsInfo(callbackQuery);
+            if (group.isCode() || group.isScreenShot() || group.isClick()) {
+                group.setClick(!group.isClick());
+                groupRepository.saveOptional(group);
+                showPaymentsInfo(callbackQuery);
+                return;
+            }
+            Long userId = callbackQuery.getFrom().getId();
+            sender.sendMessage(userId, langService.getMessage(LangFields.ONE_PAYMENT_WILL_BE_ACTIVE_TEXT, commonUtils.getUserLang(userId)));
             return;
         }
         Long userId = callbackQuery.getFrom().getId();
@@ -191,9 +217,14 @@ public class CallbackServiceImpl implements CallbackService {
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Group group = groupRepository.getByIdDefault(botId);
         if (group.isAllowPayment()) {
-            group.setPayme(!group.isPayme());
-            groupRepository.saveOptional(group);
-            showPaymentsInfo(callbackQuery);
+            if (group.isCode() || group.isScreenShot() || group.isClick()) {
+                group.setPayme(!group.isPayme());
+                groupRepository.saveOptional(group);
+                showPaymentsInfo(callbackQuery);
+                return;
+            }
+            Long userId = callbackQuery.getFrom().getId();
+            sender.sendMessage(userId, langService.getMessage(LangFields.ONE_PAYMENT_WILL_BE_ACTIVE_TEXT, commonUtils.getUserLang(userId)));
             return;
         }
         Long userId = callbackQuery.getFrom().getId();
@@ -202,21 +233,29 @@ public class CallbackServiceImpl implements CallbackService {
     }
 
     private void changeStatusScreenshot(CallbackQuery callbackQuery) {
-
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Group group = groupRepository.getByIdDefault(botId);
-        group.setScreenShot(!group.isScreenShot());
-        groupRepository.saveOptional(group);
-        showPaymentsInfo(callbackQuery);
+        if (group.isCode() || group.isClick() || group.isPayme()) {
+            group.setScreenShot(!group.isScreenShot());
+            groupRepository.saveOptional(group);
+            showPaymentsInfo(callbackQuery);
+            return;
+        }
+        Long userId = callbackQuery.getFrom().getId();
+        sender.sendMessage(userId, langService.getMessage(LangFields.ONE_PAYMENT_WILL_BE_ACTIVE_TEXT, commonUtils.getUserLang(userId)));
     }
 
     private void changeStatusCode(CallbackQuery callbackQuery) {
-
         long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
         Group group = groupRepository.getByIdDefault(botId);
-        group.setCode(!group.isCode());
-        groupRepository.saveOptional(group);
-        showPaymentsInfo(callbackQuery);
+        if (group.isScreenShot() || group.isClick() || group.isPayme()) {
+            group.setCode(!group.isCode());
+            groupRepository.saveOptional(group);
+            showPaymentsInfo(callbackQuery);
+            return;
+        }
+        Long userId = callbackQuery.getFrom().getId();
+        sender.sendMessage(userId, langService.getMessage(LangFields.ONE_PAYMENT_WILL_BE_ACTIVE_TEXT, commonUtils.getUserLang(userId)));
     }
 
     private void showPaymentsInfo(CallbackQuery callbackQuery) {
@@ -445,6 +484,7 @@ public class CallbackServiceImpl implements CallbackService {
         }
         sender.deleteMessage(userId, callbackQuery.getMessage().getMessageId());
         commonUtils.setState(userId, StateEnum.SENDING_TARIFF_PRICE);
+        tempTariffs.sort(Comparator.comparing(t -> t.getType().ordinal()));
         List<Integer> list = tempTariffs.stream().map(Tariff::getType).map(ExpireType::ordinal).toList();
         Integer i = list.get(0);
         String expireText = responseText.getSendExpireText(i, userLang);

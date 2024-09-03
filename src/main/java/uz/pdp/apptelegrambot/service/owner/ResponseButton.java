@@ -50,9 +50,12 @@ public class ResponseButton {
         markup.setResizeKeyboard(true);
         KeyboardButton keyboardButton = new KeyboardButton(langService.getMessage(LangFields.BUTTON_SEND_CONTACT_NUMBER, lang));
         keyboardButton.setRequestContact(true);
-        KeyboardRow row = new KeyboardRow();
-        row.add(keyboardButton);
-        markup.setKeyboard(List.of(row));
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(keyboardButton);
+        KeyboardButton backButton = new KeyboardButton(langService.getMessage(LangFields.BACK_TEXT, lang));
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(backButton);
+        markup.setKeyboard(List.of(row1, row2));
         return markup;
     }
 
@@ -111,13 +114,18 @@ public class ResponseButton {
 
     public InlineKeyboardMarkup botInfo(long botId, String userLang) {
         List<Map<String, String>> list = new ArrayList<>();
+        Group group = groupRepository.getByIdDefault(botId);
 
         list.add(Map.of(langService.getMessage(LangFields.TARIFF_LIST_TEXT, userLang), AppConstant.TARIFF_LIST_DATA + botId));
         list.add(Map.of(langService.getMessage(LangFields.PAYMENT_METHODS_TEXT, userLang), AppConstant.PAMYENT_MATHODS_DATA + botId));
         list.add(Map.of(langService.getMessage(LangFields.CARD_NUMBER_TEXT, userLang), AppConstant.CARD_NUMBER_DATA + botId));
-        list.add(Map.of(langService.getMessage(LangFields.GENERATE_CODE_TEXT, userLang), AppConstant.GENERATE_CODE_DATA + botId));
-        list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SCREENSHOTS, userLang), AppConstant.SEE_ALL_SCREENSHOTS + botId));
-        Group group = groupRepository.getByIdDefault(botId);
+        if (group.isCode()) {
+            list.add(Map.of(langService.getMessage(LangFields.GENERATE_CODE_TEXT, userLang), AppConstant.GENERATE_CODE_DATA + botId));
+        }
+        if (group.isScreenShot()) {
+            list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SCREENSHOTS, userLang), AppConstant.SEE_ALL_SCREENSHOTS + botId));
+        }
+        list.add(Map.of(langService.getMessage(LangFields.ADMIN_ORDER_INFO_TEXT, userLang), AppConstant.SHOW_ADMIN_ORDER_INFO_DATA + botId));
         if (group.isWorked()) {
             list.add(Map.of(langService.getMessage(LangFields.STOP_BOT_TEXT, userLang), AppConstant.START_STOP_BOT_DATA + botId));
         } else
@@ -218,5 +226,13 @@ public class ResponseButton {
         list.add(Map.of(langService.getMessage(LangFields.DELETE_TARIFF_TEXT, userLang), AppConstant.DELETE_TARIFF_DATA + tariffId));
         list.add(Map.of(langService.getMessage(LangFields.BACK_TEXT, userLang), AppConstant.BACK_TO_TARIFFS_DATA + tariff.getBotId()));
         return buttonService.callbackKeyboard(list);
+    }
+
+    public ReplyKeyboard back(Long userId) {
+        return buttonService.withString(List.of(langService.getMessage(LangFields.BACK_TEXT, commonUtils.getUserLang(userId))));
+    }
+
+    public InlineKeyboardMarkup backToBotInfo(String userLang, long botId) {
+        return buttonService.callbackKeyboard(List.of(Map.of(langService.getMessage(LangFields.BACK_TEXT, userLang), AppConstant.BACK_TO_BOT_INFO_DATA + botId)));
     }
 }

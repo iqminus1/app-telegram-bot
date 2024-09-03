@@ -64,7 +64,7 @@ public class AdminCallbackServiceImpl implements AdminCallbackService {
         screenshotGroup.setType(tariff.getType());
         screenshotGroup.setSendUserId(userId);
         temp.addTempScreenshot(userId, screenshotGroup);
-        String message = langService.getMessage(LangFields.SEND_MONEY_TO_CARD_AND_SEND_SCREENSHOT_TEXT, userLang).formatted(tariff.getPrice(), group.getCardName(), group.getCardNumber());
+        String message = langService.getMessage(LangFields.SEND_MONEY_TO_CARD_AND_SEND_SCREENSHOT_TEXT, userLang).formatted(group.getCardNumber(), group.getCardName(), tariff.getPrice());
         sender.sendMessageWithMarkdown(userId, message);
     }
 }

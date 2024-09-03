@@ -66,8 +66,21 @@ public class MessageServiceImpl implements MessageService {
                             showGroupList(message);
                         }
                     }
+                    case SENDING_CONTACT_NUMBER -> {
+                        if (checkStrings(text, LangFields.BACK_TEXT, commonUtils.getUserLang(userId))) {
+                            backToStart(userId);
+                            return;
+                        }
+                        exceptionContactNumber(userId);
+                    }
                     case SELECT_LANGUAGE -> changeLanguage(text, userId);
-                    case SENDING_BOT_TOKEN -> setToken(text, userId);
+                    case SENDING_BOT_TOKEN -> {
+                        if (checkStrings(text, LangFields.BACK_TEXT, commonUtils.getUserLang(userId))) {
+                            backToStart(userId);
+                            return;
+                        }
+                        setToken(text, userId);
+                    }
                     case SENDING_TARIFF_PRICE -> setTariffPrice(message);
                     case SENDING_CARD_NUMBER -> checkCardNumber(message);
                     case SENDING_CARD_NAME -> setCardName(message);
@@ -84,6 +97,15 @@ public class MessageServiceImpl implements MessageService {
                 }
             }
         }
+    }
+
+    private void backToStart(Long userId) {
+        commonUtils.setState(userId, StateEnum.START);
+        sender.sendMessage(userId, langService.getMessage(LangFields.BACK_TO_START_TEXT, commonUtils.getUserLang(userId)), responseButton.start(commonUtils.getUserLang(userId)));
+    }
+
+    private void exceptionContactNumber(Long userId) {
+        sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_CONTACT_NUMBER_TEXT, commonUtils.getUserLang(userId)), responseButton.contactNumber(commonUtils.getUserLang(userId)));
     }
 
     private void setCardName(Message message) {
@@ -114,12 +136,12 @@ public class MessageServiceImpl implements MessageService {
 
             tempGroup.setCardNumber(formattedCardNumber);
             commonUtils.setState(userId, StateEnum.SENDING_CARD_NAME);
-            sender.sendMessage(userId, langService.getMessage(LangFields.SEND_CARD_NAME_TEXT, userLang));
+            sender.sendMessageAndRemove(userId, langService.getMessage(LangFields.SEND_CARD_NAME_TEXT, userLang));
             return;
         } else if (text.matches("\\d{4} \\d{4} \\d{4} \\d{4}")) {
             tempGroup.setCardNumber(text);
             commonUtils.setState(userId, StateEnum.SENDING_CARD_NAME);
-            sender.sendMessage(userId, langService.getMessage(LangFields.SEND_CARD_NAME_TEXT, userLang));
+            sender.sendMessageAndRemove(userId, langService.getMessage(LangFields.SEND_CARD_NAME_TEXT, userLang));
             return;
         }
         sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_CARD_NUMBER_TEXT, userLang));
@@ -169,14 +191,19 @@ public class MessageServiceImpl implements MessageService {
         Tariff tariff = tempTariffs.get(0);
         tempTariffs.remove(tariff);
         tariff.setPrice(price);
+        Long tempId = tariff.getId();
         temp.removeTempTariff(tariff.getType().ordinal(), userId);
         tariffRepository.saveOptional(tariff);
         if (tempTariffs.isEmpty()) {
             commonUtils.setState(userId, StateEnum.START);
             String sendMessage = langService.getMessage(LangFields.SUCCESSFULLY_ADDED_TARIFF_PRICE_TEXT, userLang);
             long tempBotId = temp.getTempBotId(userId);
+
             if (tempBotId == 0) {
                 sender.sendMessage(userId, sendMessage, responseButton.start(userLang));
+                if (tempId == null) {
+                    sender.sendMessage(userId, langService.getMessage(LangFields.YOU_SHOULD_PAY_FOR_WORKING_BOT_TEXT, userLang));
+                }
                 return;
             }
             sender.sendMessage(userId, sendMessage, responseButton.showTariffs(tempBotId, userId, AppConstant.SHOW_PRICE_INFO_DATA));
@@ -239,7 +266,7 @@ public class MessageServiceImpl implements MessageService {
         }
         commonUtils.setState(userId, StateEnum.SENDING_BOT_TOKEN);
         String message = langService.getMessage(LangFields.SEND_BOT_TOKEN_TEXT, userLang);
-        sender.sendMessageAndRemove(userId, message);
+        sender.sendMessage(userId, message, responseButton.back(userId));
     }
 
     private boolean checkStrings(String text, LangFields field, String userLang) {

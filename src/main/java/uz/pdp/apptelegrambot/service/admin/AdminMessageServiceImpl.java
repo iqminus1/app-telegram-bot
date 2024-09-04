@@ -197,7 +197,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
             sender.sendMessage(userId, langService.getMessage(LangFields.SECTION_DONT_WORK_TEXT, userLang), responseButton.start(group.getId(), userLang));
             return;
         }
-        Optional<CodeGroup> optionalCodeGroup = codeGroupRepository.findByCodeAndBotId(text, group.getId());
+        Optional<CodeGroup> optionalCodeGroup = codeGroupRepository.findByCodeAndBotIdAndActive(text, group.getId(),false);
         if (optionalCodeGroup.isEmpty()) {
             adminUtils.setUserState(userId, StateEnum.START);
             sender.sendMessage(userId, langService.getMessage(LangFields.JOIN_REQ_CODE_INVALID_TEXT, userLang), responseButton.start(group.getId(), userLang));

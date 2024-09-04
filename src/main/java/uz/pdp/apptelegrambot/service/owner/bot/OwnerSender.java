@@ -11,7 +11,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCa
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
@@ -107,14 +106,4 @@ public class OwnerSender extends DefaultAbsSender {
         }
     }
 
-    public void autoSendReplyKeyboard(Long userId, ReplyKeyboard keyboard) {
-        try {
-            SendMessage sendMessage = new SendMessage(userId.toString(), ".");
-            sendMessage.setReplyMarkup(keyboard);
-            Message execute = execute(sendMessage);
-            deleteMessage(userId, execute.getMessageId());
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

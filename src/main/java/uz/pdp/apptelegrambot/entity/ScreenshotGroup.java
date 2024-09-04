@@ -6,7 +6,7 @@ import jakarta.persistence.Enumerated;
 import lombok.*;
 import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
 import uz.pdp.apptelegrambot.enums.ExpireType;
-import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
+import uz.pdp.apptelegrambot.enums.Status;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class ScreenshotGroup extends AbsLongEntity implements Serializable {
     private String path;
 
     @Enumerated(EnumType.STRING)
-    private ScreenshotStatus status;
+    private Status status;
 
     private LocalDateTime activeAt;
 

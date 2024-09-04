@@ -3,12 +3,15 @@ package uz.pdp.apptelegrambot.service.owner.bot;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
@@ -91,6 +94,25 @@ public class OwnerSender extends DefaultAbsSender {
         editMessageCaption.setMessageId(messageId);
         try {
             execute(editMessageCaption);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Chat getChat(Long userId) {
+        try {
+            return execute(new GetChat(userId.toString()));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void autoSendReplyKeyboard(Long userId, ReplyKeyboard keyboard) {
+        try {
+            SendMessage sendMessage = new SendMessage(userId.toString(), ".");
+            sendMessage.setReplyMarkup(keyboard);
+            Message execute = execute(sendMessage);
+            deleteMessage(userId, execute.getMessageId());
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }

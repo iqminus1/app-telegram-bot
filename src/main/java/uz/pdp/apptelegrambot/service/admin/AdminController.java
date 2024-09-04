@@ -33,6 +33,7 @@ public class AdminController {
     private final AdminResponseText adminResponseText;
     private final ScreenshotGroupRepository screenshotGroupRepository;
     private final Random random;
+    private final UserAdminChatRepository userAdminChatRepository;
     Map<Long, AdminSender> adminSender = new ConcurrentHashMap<>();
     Map<Long, AdminUtils> adminUtils = new ConcurrentHashMap<>();
 
@@ -46,7 +47,7 @@ public class AdminController {
         this.adminUtils.put(adminId, adminUtils);
         MyChatMemberService myChatMemberService = new MyChatMemberServiceImpl(groupRepository, sender);
         AdminResponseButton adminResponseButton = new AdminResponseButton(buttonService, groupRepository, langService, tariffRepository, responseText);
-        AdminMessageServiceImpl adminMessageService = new AdminMessageServiceImpl(sender, langService, adminUtils, adminResponseButton, groupRepository, buttonService, codeGroupRepository, orderRepository, adminResponseText, adminTemp, screenshotGroupRepository, tariffRepository, token);
+        AdminMessageServiceImpl adminMessageService = new AdminMessageServiceImpl(sender, langService, adminUtils, adminResponseButton, groupRepository, buttonService, codeGroupRepository, orderRepository, adminResponseText, adminTemp, screenshotGroupRepository, tariffRepository,userAdminChatRepository, token);
         ChatJoinRequestService chatJoinRequestService = new ChatJoinRequestServiceImpl(sender, orderRepository, langService, adminResponseButton, groupRepository, adminUtils);
         AdminCallbackServiceImpl callbackService = new AdminCallbackServiceImpl(sender, adminResponseButton, langService, adminUtils, tariffRepository, adminTemp);
         AdminProcessService adminProcessService = new AdminProcessServiceImpl(myChatMemberService, chatJoinRequestService, adminMessageService, callbackService);

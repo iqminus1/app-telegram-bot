@@ -8,8 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import uz.pdp.apptelegrambot.entity.*;
 import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
-import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 import uz.pdp.apptelegrambot.enums.StateEnum;
+import uz.pdp.apptelegrambot.enums.Status;
 import uz.pdp.apptelegrambot.repository.*;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
@@ -39,6 +39,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     private final AdminTemp temp;
     private final ScreenshotGroupRepository screenshotGroupRepository;
     private final TariffRepository tariffRepository;
+    private final UserAdminChatRepository userAdminChatRepository;
     private final String token;
 
     @Override
@@ -67,6 +68,8 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                             checkAndSendTariffs(userId, userLang);
                         } else if (text.equals(langService.getMessage(LangFields.MY_ORDERS_TEXT, userLang))) {
                             sendOrders(userId, userLang);
+                        } else if (text.equals(langService.getMessage(LangFields.SEND_MESSAGE_TO_ADMIN_TEXT, userLang))) {
+                            sendMessageToAdmin(userId, userLang);
                         }
                     }
                     case SELECT_LANGUAGE -> changeLanguage(text, userId, userLang);
@@ -76,6 +79,13 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                             return;
                         }
                         checkCode(text, userId, userLang);
+                    }
+                    case SENDING_MESSAGE_TO_ADMIN -> {
+                        if (text.equals(langService.getMessage(LangFields.BACK_TEXT, userLang))) {
+                            backToStart(userId);
+                            return;
+                        }
+                        saveMessage(message);
                     }
                     default ->
                             sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, userLang), responseButton.start(sender.getGroup().getId(), userLang));
@@ -88,6 +98,20 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                 }
             }
         }
+    }
+
+    private void saveMessage(Message message) {
+        Long userId = message.getFrom().getId();
+        Integer messageId = message.getMessageId();
+        String text = message.getText();
+        Long botId = sender.getGroup().getId();
+        userAdminChatRepository.save(new UserAdminChat(userId, messageId, text, botId, Status.DONT_SEE, null, new ArrayList<>()));
+        sender.sendMessage(userId, langService.getMessage(LangFields.YOUR_MESSAGE_SENT_TO_ADMINSTRATOR_TEXT, adminUtils.getUserLang(userId)));
+    }
+
+    private void sendMessageToAdmin(Long userId, String userLang) {
+        adminUtils.setUserState(userId, StateEnum.SENDING_MESSAGE_TO_ADMIN);
+        sender.sendMessage(userId, langService.getMessage(LangFields.SEND_MESSAGE_TEXT, userLang), buttonService.withString(List.of(langService.getMessage(LangFields.BACK_TEXT, userLang))));
     }
 
     private void backToStart(Long userId) {
@@ -203,7 +227,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
 
     private void sendCodeText(Long userId, String userLang) {
         adminUtils.setUserState(userId, StateEnum.SENDING_JOIN_REQ_CODE);
-        sender.sendMessage(userId, langService.getMessage(LangFields.SEND_CODE_FOR_JOIN_REQ_TEXT, userLang),buttonService.withString(List.of(langService.getMessage(LangFields.BACK_TEXT,userLang))));
+        sender.sendMessage(userId, langService.getMessage(LangFields.SEND_CODE_FOR_JOIN_REQ_TEXT, userLang), buttonService.withString(List.of(langService.getMessage(LangFields.BACK_TEXT, userLang))));
     }
 
     private void checkAndSendTariffs(Long userId, String userLang) {
@@ -222,7 +246,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
             Tariff tariff = tariffList.get(0);
             ScreenshotGroup screenshotGroup = new ScreenshotGroup();
             screenshotGroup.setGroupId(group.getGroupId());
-            screenshotGroup.setStatus(ScreenshotStatus.DONT_SEE);
+            screenshotGroup.setStatus(Status.DONT_SEE);
             screenshotGroup.setTariffId(tariff.getBotId());
             screenshotGroup.setTariffPrice(tariff.getPrice());
             screenshotGroup.setType(tariff.getType());

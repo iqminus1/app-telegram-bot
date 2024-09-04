@@ -1,6 +1,6 @@
 package uz.pdp.apptelegrambot.enums;
 
-public enum ScreenshotStatus {
+public enum Status {
     DONT_SEE,
     ACCEPT,
     REJECT

@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 @Entity
-@SQLRestriction("active = false")
 public class CodeGroup extends AbsLongEntity implements Serializable {
     private String code;
 

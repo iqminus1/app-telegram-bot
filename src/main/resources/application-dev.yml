@@ -1,10 +1,10 @@
 server:
-  port: 777
+  port: **
 spring:
   datasource:
-    username: postgres
-    password: 123
-    url: jdbc:postgresql://localhost:5432/app_telegram_bot
+    username: ***
+    password: ***
+    url: jdbc:postgresql://localhost:5432/***
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

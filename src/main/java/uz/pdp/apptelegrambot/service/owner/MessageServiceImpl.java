@@ -7,19 +7,23 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.Tariff;
 import uz.pdp.apptelegrambot.entity.User;
+import uz.pdp.apptelegrambot.entity.UserAdminChat;
 import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
 import uz.pdp.apptelegrambot.enums.StateEnum;
+import uz.pdp.apptelegrambot.enums.Status;
 import uz.pdp.apptelegrambot.repository.*;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.AdminController;
+import uz.pdp.apptelegrambot.service.admin.bot.AdminSender;
 import uz.pdp.apptelegrambot.service.owner.bot.OwnerSender;
 import uz.pdp.apptelegrambot.utils.AppConstant;
 import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +43,7 @@ public class MessageServiceImpl implements MessageService {
     private final OrderRepository orderRepository;
     private final ScreenshotGroupRepository screenshotGroupRepository;
     private final UserLangRepository userLangRepository;
+    private final UserAdminChatRepository userAdminChatRepository;
 
     @Override
     public void process(Message message) {
@@ -81,6 +86,13 @@ public class MessageServiceImpl implements MessageService {
                         }
                         setToken(text, userId);
                     }
+                    case SEEING_SENDED_MESSAGES -> {
+                        if (message.isReply()) {
+                            sendMessageToUser(message);
+                            return;
+                        } else
+                            sendExceptionReply(userId, commonUtils.getUserLang(userId));
+                    }
                     case SENDING_TARIFF_PRICE -> setTariffPrice(message);
                     case SENDING_CARD_NUMBER -> checkCardNumber(message);
                     case SENDING_CARD_NAME -> setCardName(message);
@@ -97,6 +109,29 @@ public class MessageServiceImpl implements MessageService {
                 }
             }
         }
+    }
+
+    private void sendExceptionReply(Long userId, String userLang) {
+        sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_REPLY_TEXT, userLang));
+    }
+
+    private void sendMessageToUser(Message message) {
+        Integer messageId = message.getReplyToMessage().getMessageId();
+        Long userId = message.getFrom().getId();
+        Optional<UserAdminChat> optionalChat = userAdminChatRepository.findByAdminGetMessageId(messageId);
+        if (optionalChat.isEmpty()) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_REPLY_TEXT, commonUtils.getUserLang(userId)));
+            return;
+        }
+        UserAdminChat userAdminChat = optionalChat.get();
+        AdminSender adminSender = adminController.getSenderByAdminId(userId);
+        String text = message.getText();
+        adminSender.sendMessage(userAdminChat.getSenderId(), langService.getMessage(LangFields.SEND_MESSAGE_TO_USER_TEXT,adminController.getAdminUtils(userId).getUserLang(userAdminChat.getSenderId())).formatted(text));
+        List<String> sendingMessages = userAdminChat.getSendingMessages();
+        sendingMessages.add(text);
+        userAdminChat.setStatus(Status.ACCEPT);
+        userAdminChat.setSendingMessages(sendingMessages);
+        userAdminChatRepository.save(userAdminChat);
     }
 
     private void backToStart(Long userId) {

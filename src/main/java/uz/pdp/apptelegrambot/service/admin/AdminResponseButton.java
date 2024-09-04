@@ -44,6 +44,7 @@ public class AdminResponseButton {
             list.add(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_CODE_TEXT, lang));
         }
         list.add(langService.getMessage(LangFields.MY_ORDERS_TEXT, lang));
+        list.add(langService.getMessage(LangFields.SEND_MESSAGE_TO_ADMIN_TEXT, lang));
         list.add(langService.getMessage(LangFields.BUTTON_LANG_SETTINGS, lang));
 
         return buttonService.withString(list);

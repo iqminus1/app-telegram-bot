@@ -6,8 +6,8 @@ import uz.pdp.apptelegrambot.enums.ExpireType;
 import java.time.LocalDateTime;
 
 public interface AppConstant {
-    String TOKEN = "**";
-    String USERNAME = "**";
+    String TOKEN = "7526831468:AAFTZllAKdDJEhih22K-gcyUja4Da_pE_54";
+    String USERNAME = "manager_group_father_bot";
     String TARIFF_SELECTING_DATA = "tariffSelectData:";
     String GREEN_TEXT = " \uD83D\uDFE2";
     String ACCEPT_TARIFFS_DATA = "acceptTariffs";
@@ -43,7 +43,7 @@ public interface AppConstant {
     String BACK_TO_TARIFFS_DATA = "backToTariffsBBI:";
     String SHOW_GROUP_LIST = "showGroupList:";
     String GET_LINK_FOR_JOIN_DATA = "getLinkForJoinBBI";
-    String SHOW_ADMIN_ORDER_INFO_DATA = "showAdminOrderInfoBBI:";
+    String SEE_ALL_SENDED_MESSAGES_DATA = "seeAllSendedMessageBBI:";
 
     static Order updateOrderExpire(Order order, ExpireType type) {
         if (order.getExpireDay() == null) {

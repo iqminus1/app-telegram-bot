@@ -3,7 +3,7 @@ package uz.pdp.apptelegrambot.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uz.pdp.apptelegrambot.entity.ScreenshotGroup;
-import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
+import uz.pdp.apptelegrambot.enums.Status;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public interface ScreenshotGroupRepository extends JpaRepository<ScreenshotGroup
         return findById(id).orElseThrow();
     }
 
-    List<ScreenshotGroup> findAllByGroupIdAndStatus(Long groupId, ScreenshotStatus status);
+    List<ScreenshotGroup> findAllByGroupIdAndStatus(Long groupId, Status status);
 
 
     default void saveOptional(ScreenshotGroup screenshotGroup) {

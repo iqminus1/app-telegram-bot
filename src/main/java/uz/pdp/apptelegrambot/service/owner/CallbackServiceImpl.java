@@ -2,15 +2,19 @@ package uz.pdp.apptelegrambot.service.owner;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.pdp.apptelegrambot.entity.*;
 import uz.pdp.apptelegrambot.enums.ExpireType;
 import uz.pdp.apptelegrambot.enums.LangFields;
-import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
 import uz.pdp.apptelegrambot.enums.StateEnum;
+import uz.pdp.apptelegrambot.enums.Status;
 import uz.pdp.apptelegrambot.repository.*;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
@@ -43,6 +47,7 @@ public class CallbackServiceImpl implements CallbackService {
     private final OrderRepository orderRepository;
     private final AdminController adminController;
     private final ButtonService buttonService;
+    private final UserAdminChatRepository userAdminChatRepository;
 
     @Override
     public void process(CallbackQuery callbackQuery) {
@@ -59,6 +64,8 @@ public class CallbackServiceImpl implements CallbackService {
                     showScreenshots(callbackQuery);
                 } else if (data.startsWith(AppConstant.GENERATE_CODE_FOR_TARIFF_DATA)) {
                     generateCode(callbackQuery);
+                } else if (data.startsWith(AppConstant.SEE_ALL_SENDED_MESSAGES_DATA)) {
+                    showAllMessages(callbackQuery);
                 } else if (data.startsWith(AppConstant.ACCEPT_SCREENSHOT_DATA)) {
                     acceptScreenshot(callbackQuery);
                 } else if (data.startsWith(AppConstant.REJECT_SCREENSHOT_DATA)) {
@@ -118,6 +125,40 @@ public class CallbackServiceImpl implements CallbackService {
             }
 
         }
+    }
+
+    private void showAllMessages(CallbackQuery callbackQuery) {
+        Long userId = callbackQuery.getFrom().getId();
+        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+        List<UserAdminChat> messages = userAdminChatRepository.findAllByBotIdAndStatus(botId, Status.DONT_SEE);
+        Integer messageId = callbackQuery.getMessage().getMessageId();
+        String userLang = commonUtils.getUserLang(userId);
+        if (messages.isEmpty()) {
+            commonUtils.setState(userId, StateEnum.SEEING_SENDED_MESSAGES);
+            sender.changeTextAndKeyboard(userId, messageId, langService.getMessage(LangFields.SENDED_MESSAGES_EMPTY_TEXT, userLang), responseButton.backToBotInfo(userLang, botId));
+            return;
+        }
+        for (UserAdminChat message : messages) {
+            Chat chat = sender.getChat(message.getSenderId());
+            String str = langService.getMessage(LangFields.SENDER_INFO, userLang).formatted("#" + message.getSenderId());
+            if (chat.getFirstName() != null)
+                str = str + chat.getFirstName() + " ";
+            if (chat.getUserName() != null)
+                str = str + "@" + chat.getUserName() + "\n";
+            str = str + "\n";
+            str = str + message.getText();
+            try {
+                Message execute = sender.execute(new SendMessage(userId.toString(), str));
+                message.setAdminGetMessageId(execute.getMessageId());
+                userAdminChatRepository.save(message);
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        sender.autoSendReplyKeyboard(userId, new ReplyKeyboardRemove(true));
+        sender.deleteMessage(userId, messageId);
+        commonUtils.setState(userId, StateEnum.SEEING_SENDED_MESSAGES);
+        sender.sendMessage(userId, langService.getMessage(LangFields.AFTER_ENDING_CLICK_BACK_TEXT, userLang), responseButton.backToBotInfo(userLang, botId));
     }
 
     private void changeTariffPrice(CallbackQuery callbackQuery) {
@@ -247,7 +288,7 @@ public class CallbackServiceImpl implements CallbackService {
         long userId = callbackQuery.getFrom().getId();
         String userLang = commonUtils.getUserLang(userId);
         long screenshotId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        ScreenshotGroup screenshotGroup = updateScreenshot(screenshotId, ScreenshotStatus.REJECT);
+        ScreenshotGroup screenshotGroup = updateScreenshot(screenshotId, Status.REJECT);
         String message = langService.getMessage(LangFields.REJECTED_SCREENSHOT_TEXT, userLang);
         AdminSender adminSender = adminController.getSenderByAdminId(userId);
         message = getUsernameAndId(adminSender, screenshotGroup, message);
@@ -276,7 +317,7 @@ public class CallbackServiceImpl implements CallbackService {
     private void acceptScreenshot(CallbackQuery callbackQuery) {
         long userId = callbackQuery.getFrom().getId();
         long screenshotId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        ScreenshotGroup screenshotGroup = updateScreenshot(screenshotId, ScreenshotStatus.ACCEPT);
+        ScreenshotGroup screenshotGroup = updateScreenshot(screenshotId, Status.ACCEPT);
         String message = langService.getMessage(LangFields.ACCEPTED_SCREENSHOT_TEXT, commonUtils.getUserLang(userId));
         AdminSender adminSender = adminController.getSenderByAdminId(userId);
         message = getUsernameAndId(adminSender, screenshotGroup, message);
@@ -305,7 +346,7 @@ public class CallbackServiceImpl implements CallbackService {
         adminSender.sendMessage(sendUserId, message);
     }
 
-    private ScreenshotGroup updateScreenshot(long id, ScreenshotStatus status) {
+    private ScreenshotGroup updateScreenshot(long id, Status status) {
         ScreenshotGroup screenshotGroup = screenshotGroupRepository.getById(id);
         screenshotGroup.setStatus(status);
         screenshotGroup.setActiveAt(LocalDateTime.now());
@@ -344,7 +385,7 @@ public class CallbackServiceImpl implements CallbackService {
             sender.sendMessage(userId, langService.getMessage(LangFields.FIRST_ADD_GROUP_TEXT, userLang));
             return;
         }
-        List<ScreenshotGroup> screenshots = screenshotGroupRepository.findAllByGroupIdAndStatus(group.getGroupId(), ScreenshotStatus.DONT_SEE);
+        List<ScreenshotGroup> screenshots = screenshotGroupRepository.findAllByGroupIdAndStatus(group.getGroupId(), Status.DONT_SEE);
         if (screenshots.isEmpty()) {
             sender.sendMessage(userId, langService.getMessage(LangFields.SCREENSHOTS_EMPTY_TEXT, userLang));
             return;
@@ -436,6 +477,7 @@ public class CallbackServiceImpl implements CallbackService {
             message = langService.getMessage(LangFields.BOT_INFO_NULL_TEXT, userLang).formatted(group.getBotUsername());
         InlineKeyboardMarkup markup = responseButton.botInfo(botId, userLang);
         sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), message, markup);
+//        sender.autoSendReplyKeyboard(userId, responseButton.start(userLang));
     }
 
     private void changeTariffStatus(Long userId, String data, CallbackQuery callbackQuery) {

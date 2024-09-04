@@ -6,7 +6,7 @@ import uz.pdp.apptelegrambot.entity.Group;
 import uz.pdp.apptelegrambot.entity.ScreenshotGroup;
 import uz.pdp.apptelegrambot.entity.Tariff;
 import uz.pdp.apptelegrambot.enums.LangFields;
-import uz.pdp.apptelegrambot.enums.ScreenshotStatus;
+import uz.pdp.apptelegrambot.enums.Status;
 import uz.pdp.apptelegrambot.enums.StateEnum;
 import uz.pdp.apptelegrambot.repository.TariffRepository;
 import uz.pdp.apptelegrambot.service.LangService;
@@ -58,7 +58,7 @@ public class AdminCallbackServiceImpl implements AdminCallbackService {
         utils.setUserState(userId, StateEnum.SENDING_JOIN_REQ_SCREENSHOT);
         ScreenshotGroup screenshotGroup = new ScreenshotGroup();
         screenshotGroup.setGroupId(group.getGroupId());
-        screenshotGroup.setStatus(ScreenshotStatus.DONT_SEE);
+        screenshotGroup.setStatus(Status.DONT_SEE);
         screenshotGroup.setTariffId(tariffId);
         screenshotGroup.setTariffPrice(tariff.getPrice());
         screenshotGroup.setType(tariff.getType());

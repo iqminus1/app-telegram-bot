@@ -125,6 +125,7 @@ public class ResponseButton {
         if (group.isCode()) {
             list.add(Map.of(langService.getMessage(LangFields.GENERATE_CODE_TEXT, userLang), AppConstant.GENERATE_CODE_DATA + botId));
         }
+        list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SENDED_MESSAGES_TEXT,userLang),AppConstant.SEE_ALL_SENDED_MESSAGES_DATA+botId));
         if (group.isWorked()) {
             list.add(Map.of(langService.getMessage(LangFields.STOP_BOT_TEXT, userLang), AppConstant.START_STOP_BOT_DATA + botId));
         } else

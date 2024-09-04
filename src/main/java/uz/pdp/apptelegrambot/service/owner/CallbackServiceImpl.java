@@ -7,7 +7,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.pdp.apptelegrambot.entity.*;
@@ -155,7 +154,6 @@ public class CallbackServiceImpl implements CallbackService {
                 throw new RuntimeException(e);
             }
         }
-        sender.autoSendReplyKeyboard(userId, new ReplyKeyboardRemove(true));
         sender.deleteMessage(userId, messageId);
         commonUtils.setState(userId, StateEnum.SEEING_SENDED_MESSAGES);
         sender.sendMessage(userId, langService.getMessage(LangFields.AFTER_ENDING_CLICK_BACK_TEXT, userLang), responseButton.backToBotInfo(userLang, botId));
@@ -477,7 +475,6 @@ public class CallbackServiceImpl implements CallbackService {
             message = langService.getMessage(LangFields.BOT_INFO_NULL_TEXT, userLang).formatted(group.getBotUsername());
         InlineKeyboardMarkup markup = responseButton.botInfo(botId, userLang);
         sender.changeTextAndKeyboard(userId, callbackQuery.getMessage().getMessageId(), message, markup);
-//        sender.autoSendReplyKeyboard(userId, responseButton.start(userLang));
     }
 
     private void changeTariffStatus(Long userId, String data, CallbackQuery callbackQuery) {

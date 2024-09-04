@@ -263,8 +263,11 @@ public class CallbackServiceImpl implements CallbackService {
 
     private String getUsernameAndId(AdminSender adminSender, ScreenshotGroup screenshotGroup, String message) {
         Chat chat = adminSender.getChat(screenshotGroup.getSendUserId());
+        if (chat.getFirstName() != null) {
+            message = message + chat.getFirstName();
+        }
         if (chat.getUserName() != null) {
-            message = message + "@" + chat.getUserName();
+            message = message + "\n@" + chat.getUserName();
         }
         message = message + "\n#" + chat.getId();
         return message;

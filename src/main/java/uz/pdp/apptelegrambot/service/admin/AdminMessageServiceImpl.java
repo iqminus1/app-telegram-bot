@@ -70,7 +70,13 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                         }
                     }
                     case SELECT_LANGUAGE -> changeLanguage(text, userId, userLang);
-                    case SENDING_JOIN_REQ_CODE -> checkCode(text, userId, userLang);
+                    case SENDING_JOIN_REQ_CODE -> {
+                        if (text.equals(langService.getMessage(LangFields.BACK_TEXT, userLang))) {
+                            backToStart(userId);
+                            return;
+                        }
+                        checkCode(text, userId, userLang);
+                    }
                     default ->
                             sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, userLang), responseButton.start(sender.getGroup().getId(), userLang));
                 }
@@ -82,6 +88,14 @@ public class AdminMessageServiceImpl implements AdminMessageService {
                 }
             }
         }
+    }
+
+    private void backToStart(Long userId) {
+        String userLang = adminUtils.getUserLang(userId);
+        adminUtils.setUserState(userId, StateEnum.START);
+        String message = langService.getMessage(LangFields.BACK_TO_START_TEXT, userLang);
+        ReplyKeyboard start = responseButton.start(sender.getGroup().getId(), userLang);
+        sender.sendMessage(userId, message, start);
     }
 
     private void sendOrders(Long userId, String userLang) {
@@ -189,7 +203,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
 
     private void sendCodeText(Long userId, String userLang) {
         adminUtils.setUserState(userId, StateEnum.SENDING_JOIN_REQ_CODE);
-        sender.sendMessageAndRemove(userId, langService.getMessage(LangFields.SEND_CODE_FOR_JOIN_REQ_TEXT, userLang));
+        sender.sendMessage(userId, langService.getMessage(LangFields.SEND_CODE_FOR_JOIN_REQ_TEXT, userLang),buttonService.withString(List.of(langService.getMessage(LangFields.BACK_TEXT,userLang))));
     }
 
     private void checkAndSendTariffs(Long userId, String userLang) {

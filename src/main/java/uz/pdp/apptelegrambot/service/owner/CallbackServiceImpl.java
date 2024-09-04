@@ -110,7 +110,7 @@ public class CallbackServiceImpl implements CallbackService {
                     changeTariffStatus(userId, data, callbackQuery);
                 }
             }
-            case SENDING_CARD_NUMBER -> {
+            case SENDING_CARD_NUMBER, SEEING_SENDED_MESSAGES -> {
                 if (data.startsWith(AppConstant.BACK_TO_BOT_INFO_DATA)) {
                     showBotInfo(callbackQuery);
                 }

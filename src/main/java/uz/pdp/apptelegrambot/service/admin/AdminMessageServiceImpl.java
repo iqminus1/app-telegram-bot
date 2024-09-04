@@ -175,7 +175,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
             Order order = updateOrderExpire(optionalOrder.get(), codeGroup.getType());
             orderRepository.save(order);
             adminUtils.setUserState(userId, StateEnum.START);
-            sender.sendMessage(userId, langService.getMessage(LangFields.JOIN_REQ_CODE_VALID_TEXT, userLang) + " -> " + sender.getLink(group.getGroupId()), responseButton.start(group.getId(), userLang));
+            sender.sendMessage(userId, langService.getMessage(LangFields.JOIN_REQ_CODE_VALID_TEXT, userLang) + sender.getLink(group.getGroupId()), responseButton.start(group.getId(), userLang));
             return;
         }
         Order order = updateOrderExpire(new Order(), codeGroup.getType());
@@ -194,8 +194,10 @@ public class AdminMessageServiceImpl implements AdminMessageService {
 
     private void checkAndSendTariffs(Long userId, String userLang) {
         Group group = groupRepository.getByBotToken(token);
-        if (!group.isScreenShot())
+        if (!group.isScreenShot() && group.getCardName() == null && group.getCardName().isEmpty() && group.getCardName().isBlank()) {
+            sender.sendMessage(userId, langService.getMessage(LangFields.SECTION_DONT_WORK_TEXT, userLang));
             return;
+        }
         InlineKeyboardMarkup markup = responseButton.tariffList(group.getId(), AppConstant.SCREENSHOT, userLang);
         if (markup.getKeyboard().size() == 1) {
             if (group.getGroupId() == null || group.getCardNumber() == null || group.getCardName() == null) {

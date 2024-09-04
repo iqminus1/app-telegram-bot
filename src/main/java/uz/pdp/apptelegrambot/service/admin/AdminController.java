@@ -63,7 +63,7 @@ public class AdminController {
         if (tempGroup == null)
             return;
         tempGroup.setBotUsername(sender.getBotUsername());
-        tempGroup.setExpireAt(LocalDateTime.now());
+        tempGroup.setExpireAt(LocalDateTime.now().plusYears(100));
         groupRepository.saveOptional(tempGroup);
 
     }

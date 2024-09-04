@@ -201,9 +201,6 @@ public class MessageServiceImpl implements MessageService {
 
             if (tempBotId == 0) {
                 sender.sendMessage(userId, sendMessage, responseButton.start(userLang));
-                if (tempId == null) {
-                    sender.sendMessage(userId, langService.getMessage(LangFields.YOU_SHOULD_PAY_FOR_WORKING_BOT_TEXT, userLang));
-                }
                 return;
             }
             sender.sendMessage(userId, sendMessage, responseButton.showTariffs(tempBotId, userId, AppConstant.SHOW_PRICE_INFO_DATA));
@@ -224,6 +221,7 @@ public class MessageServiceImpl implements MessageService {
             String phoneNumber = message.getContact().getPhoneNumber();
             User user = commonUtils.getUser(userId);
             user.setContactNumber(phoneNumber);
+            user.setState(StateEnum.START);
             userRepository.save(user);
             sendAddBotText(user.getId(), user);
             return;

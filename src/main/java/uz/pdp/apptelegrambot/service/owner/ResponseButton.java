@@ -118,14 +118,13 @@ public class ResponseButton {
 
         list.add(Map.of(langService.getMessage(LangFields.TARIFF_LIST_TEXT, userLang), AppConstant.TARIFF_LIST_DATA + botId));
         list.add(Map.of(langService.getMessage(LangFields.PAYMENT_METHODS_TEXT, userLang), AppConstant.PAMYENT_MATHODS_DATA + botId));
-        list.add(Map.of(langService.getMessage(LangFields.CARD_NUMBER_TEXT, userLang), AppConstant.CARD_NUMBER_DATA + botId));
+        if (group.isScreenShot()) {
+            list.add(Map.of(langService.getMessage(LangFields.CARD_NUMBER_TEXT, userLang), AppConstant.CARD_NUMBER_DATA + botId));
+            list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SCREENSHOTS, userLang), AppConstant.SEE_ALL_SCREENSHOTS + botId));
+        }
         if (group.isCode()) {
             list.add(Map.of(langService.getMessage(LangFields.GENERATE_CODE_TEXT, userLang), AppConstant.GENERATE_CODE_DATA + botId));
         }
-        if (group.isScreenShot()) {
-            list.add(Map.of(langService.getMessage(LangFields.SEE_ALL_SCREENSHOTS, userLang), AppConstant.SEE_ALL_SCREENSHOTS + botId));
-        }
-        list.add(Map.of(langService.getMessage(LangFields.ADMIN_ORDER_INFO_TEXT, userLang), AppConstant.SHOW_ADMIN_ORDER_INFO_DATA + botId));
         if (group.isWorked()) {
             list.add(Map.of(langService.getMessage(LangFields.STOP_BOT_TEXT, userLang), AppConstant.START_STOP_BOT_DATA + botId));
         } else

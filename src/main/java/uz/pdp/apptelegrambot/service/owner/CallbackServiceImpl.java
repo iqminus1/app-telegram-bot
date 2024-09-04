@@ -21,9 +21,7 @@ import uz.pdp.apptelegrambot.utils.AppConstant;
 import uz.pdp.apptelegrambot.utils.admin.AdminUtils;
 import uz.pdp.apptelegrambot.utils.owner.CommonUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 
 import static uz.pdp.apptelegrambot.utils.AppConstant.updateOrderExpire;
@@ -89,8 +87,6 @@ public class CallbackServiceImpl implements CallbackService {
                     changeStatusScreenshot(callbackQuery);
                 } else if (data.startsWith(AppConstant.CHANGE_CODE_STATUS_DATA)) {
                     changeStatusCode(callbackQuery);
-                } else if (data.startsWith(AppConstant.SHOW_ADMIN_ORDER_INFO_DATA)) {
-                    showAdminOrderInfo(callbackQuery);
                 } else if (data.startsWith(AppConstant.BACK_TO_TARIFFS_DATA)) {
                     showTariffList(callbackQuery);
                 } else if (data.equals(AppConstant.BACK_TO_BOT_LIST_DATA)) {
@@ -122,26 +118,6 @@ public class CallbackServiceImpl implements CallbackService {
             }
 
         }
-    }
-
-    private void showAdminOrderInfo(CallbackQuery callbackQuery) {
-        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Group group = groupRepository.getByIdDefault(botId);
-        LocalDateTime expireAt = group.getExpireAt();
-        Long userId = callbackQuery.getFrom().getId();
-        String userLang = commonUtils.getUserLang(group.getAdminId());
-        if (expireAt.isAfter(LocalDateTime.now())) {
-            String message = langService.getMessage(LangFields.ADMIN_PERMISSION_EXPIRED_TEXT, userLang);
-            sender.sendMessage(userId, message, responseButton.backToBotInfo(userLang, botId));
-            return;
-        }
-        LocalDate localDate = expireAt.toLocalDate();
-        LocalTime localTime = expireAt.toLocalTime();
-        String date = localDate.getYear() + "-" + localDate.getMonth().getValue() + "-" + localDate.getDayOfMonth();
-        String time = localTime.getHour() + ":" + localTime.getMinute() + ":" + localTime.getSecond();
-        String message = langService.getMessage(LangFields.ADMIN_PERMISSION_EXPIRE_AT_TEXT, userLang).formatted(date, time);
-        sender.sendMessage(userId, message, responseButton.backToBotInfo(userLang, botId));
-
     }
 
     private void changeTariffPrice(CallbackQuery callbackQuery) {

@@ -37,7 +37,7 @@ public class AdminResponseButton {
         }
         if (group.isPayme())
             list.add(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_PAYME_TEXT, lang));
-        if (group.isScreenShot()) {
+        if (group.isScreenShot() && group.getCardName() != null && group.getCardName().isEmpty() && group.getCardName().isBlank()) {
             list.add(langService.getMessage(LangFields.BUTTON_ADMIN_PAYMENT_SCREENSHOT_TEXT, lang));
         }
         if (group.isCode()) {

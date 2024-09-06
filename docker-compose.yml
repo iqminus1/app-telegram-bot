@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: app_telegram_bot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: always
+
+  app:
+    build: ..
+    container_name: app-telegram-bot
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/app_telegram_bot
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123
+    depends_on:
+      - postgres
+    ports:
+      - "777:777"
+    restart: always
+
+volumes:
+  postgres-data:

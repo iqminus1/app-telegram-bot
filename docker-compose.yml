@@ -14,7 +14,7 @@ services:
     restart: always
 
   app:
-    build: ..
+    build: .
     container_name: app-telegram-bot
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/app_telegram_bot

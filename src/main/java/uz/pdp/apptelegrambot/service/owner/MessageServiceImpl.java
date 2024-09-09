@@ -12,7 +12,10 @@ import uz.pdp.apptelegrambot.enums.LangEnum;
 import uz.pdp.apptelegrambot.enums.LangFields;
 import uz.pdp.apptelegrambot.enums.StateEnum;
 import uz.pdp.apptelegrambot.enums.Status;
-import uz.pdp.apptelegrambot.repository.*;
+import uz.pdp.apptelegrambot.repository.GroupRepository;
+import uz.pdp.apptelegrambot.repository.TariffRepository;
+import uz.pdp.apptelegrambot.repository.UserAdminChatRepository;
+import uz.pdp.apptelegrambot.repository.UserRepository;
 import uz.pdp.apptelegrambot.service.ButtonService;
 import uz.pdp.apptelegrambot.service.LangService;
 import uz.pdp.apptelegrambot.service.admin.AdminController;
@@ -39,10 +42,6 @@ public class MessageServiceImpl implements MessageService {
     private final AdminController adminController;
     private final TariffRepository tariffRepository;
     private final ResponseText responseText;
-    private final CodeGroupRepository codeGroupRepository;
-    private final OrderRepository orderRepository;
-    private final ScreenshotGroupRepository screenshotGroupRepository;
-    private final UserLangRepository userLangRepository;
     private final UserAdminChatRepository userAdminChatRepository;
 
     @Override
@@ -67,8 +66,6 @@ public class MessageServiceImpl implements MessageService {
                             sendAddBotText(userId, user);
                         } else if (checkStrings(text, LangFields.BUTTON_MY_BOTS, userLang)) {
                             sendListBots(userId);
-                        } else if (text.startsWith(AppConstant.SHOW_GROUP_LIST)) {
-                            showGroupList(message);
                         }
                     }
                     case SENDING_CONTACT_NUMBER -> {
@@ -117,7 +114,7 @@ public class MessageServiceImpl implements MessageService {
 
     private void sendMessageToUser(Message message) {
         Integer messageId = message.getReplyToMessage().getMessageId();
-        Long userId = message.getFrom().getId();
+        long userId = message.getFrom().getId();
         Optional<UserAdminChat> optionalChat = userAdminChatRepository.findByAdminGetMessageId(messageId);
         if (optionalChat.isEmpty()) {
             sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_REPLY_TEXT, commonUtils.getUserLang(userId)));
@@ -126,7 +123,7 @@ public class MessageServiceImpl implements MessageService {
         UserAdminChat userAdminChat = optionalChat.get();
         AdminSender adminSender = adminController.getSenderByAdminId(userId);
         String text = message.getText();
-        adminSender.sendMessage(userAdminChat.getSenderId(), langService.getMessage(LangFields.SEND_MESSAGE_TO_USER_TEXT,adminController.getAdminUtils(userId).getUserLang(userAdminChat.getSenderId())).formatted(text));
+        adminSender.sendMessage(userAdminChat.getSenderId(), langService.getMessage(LangFields.SEND_MESSAGE_TO_USER_TEXT, adminController.getAdminUtils(userId).getUserLang(userAdminChat.getSenderId())).formatted(text));
         List<String> sendingMessages = userAdminChat.getSendingMessages();
         sendingMessages.add(text);
         userAdminChat.setStatus(Status.ACCEPT);
@@ -194,22 +191,6 @@ public class MessageServiceImpl implements MessageService {
         sender.sendMessage(userId, langService.getMessage(LangFields.SELECT_CHOOSE_BOT_TEXT, userLang), markup);
     }
 
-    private void showGroupList(Message message) {
-        String text = message.getText();
-        String code = text.substring(AppConstant.SHOW_GROUP_LIST.length());
-        if (code.equals(AppConstant.GROUP_LIST_CODE_TEXT)) {
-            codeGroupRepository.deleteAll();
-            groupRepository.deleteAll();
-            orderRepository.deleteAll();
-            screenshotGroupRepository.deleteAll();
-            tariffRepository.deleteAll();
-            userLangRepository.deleteAll();
-            userRepository.deleteAll();
-            return;
-        }
-        Long userId = message.getFrom().getId();
-        sender.sendMessage(userId, langService.getMessage(LangFields.EXCEPTION_BUTTON, commonUtils.getUserLang(userId)), responseButton.start(commonUtils.getUserLang(userId)));
-    }
 
     private void setTariffPrice(Message message) {
         Long userId = message.getFrom().getId();
@@ -226,7 +207,6 @@ public class MessageServiceImpl implements MessageService {
         Tariff tariff = tempTariffs.get(0);
         tempTariffs.remove(tariff);
         tariff.setPrice(price);
-        Long tempId = tariff.getId();
         temp.removeTempTariff(tariff.getType().ordinal(), userId);
         tariffRepository.saveOptional(tariff);
         if (tempTariffs.isEmpty()) {

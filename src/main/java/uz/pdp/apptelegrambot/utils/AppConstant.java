@@ -13,7 +13,7 @@ public interface AppConstant {
     String ACCEPT_TARIFFS_DATA = "acceptTariffs";
     String SCREENSHOT = "payment:Screenshot";
     String TARIFF_DATA = "tariffId:";
-    String FILE_PATH = "/home/app-telegram-bot/files";
+    String FILE_PATH = "/root/app/app-telegram-bot/files";
     String BOT_DATA = "botId:";
     String SHOW_PRICE_INFO_DATA = "showPriceInfoData:";
     String GENERATE_CODE_FOR_TARIFF_DATA = "codeByTariff:";

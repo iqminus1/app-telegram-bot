@@ -6,14 +6,14 @@ import uz.pdp.apptelegrambot.enums.ExpireType;
 import java.time.LocalDateTime;
 
 public interface AppConstant {
-    String TOKEN = "7322747581:AAGvmaS2rsCtXyanlaoXLAu7sREPf6eel0U";
-    String USERNAME = "obunamarket_bot";
+    String TOKEN = "7403157157:AAGoSNnB4NRx38Hy1n_urX_F0qMir8X8sOY";
+    String USERNAME = "obunamanager_bot";
     String TARIFF_SELECTING_DATA = "tariffSelectData:";
     String GREEN_TEXT = " \uD83D\uDFE2";
     String ACCEPT_TARIFFS_DATA = "acceptTariffs";
     String SCREENSHOT = "payment:Screenshot";
     String TARIFF_DATA = "tariffId:";
-    String FILE_PATH = "/home/app-telegram-bot/files";
+    String FILE_PATH = "/root/app/app-telegram-bot/files";
     String BOT_DATA = "botId:";
     String SHOW_PRICE_INFO_DATA = "showPriceInfoData:";
     String GENERATE_CODE_FOR_TARIFF_DATA = "codeByTariff:";

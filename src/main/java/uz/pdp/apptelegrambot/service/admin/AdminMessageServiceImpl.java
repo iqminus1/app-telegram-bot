@@ -168,7 +168,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
 
     private void sendPaymePaymentLink(Long userId, String userLang) {
         String link = "https://payme.uz/";
-        Map<String, String> paymentData = responseText.getPaymentData(userLang, sender.getGroup().getId(), userId);
+        Map<String, String> paymentData = responseText.getPaymentData(userLang, sender.getGroup().getId());
         if (paymentData == null) {
             return;
         }
@@ -181,8 +181,9 @@ public class AdminMessageServiceImpl implements AdminMessageService {
     }
 
     private void sendClickPaymentLink(Long userId, String userLang) {
-        String link = "https://click.uz/perId=1/payment=1/amount=2000";
-        Map<String, String> paymentData = responseText.getPaymentData(userLang, sender.getGroup().getId(), userId);
+        Long botId = sender.getGroup().getId();
+        String link = "https://my.click.uz/services/pay?merchant_id=26420&service_id=34442&transaction_param=%s&additional_param3=%s".formatted(botId, userId);
+        Map<String, String> paymentData = responseText.getPaymentData(userLang, botId);
         if (paymentData == null) {
             return;
         }
@@ -197,7 +198,7 @@ public class AdminMessageServiceImpl implements AdminMessageService {
             sender.sendMessage(userId, langService.getMessage(LangFields.SECTION_DONT_WORK_TEXT, userLang), responseButton.start(group.getId(), userLang));
             return;
         }
-        Optional<CodeGroup> optionalCodeGroup = codeGroupRepository.findByCodeAndBotIdAndActive(text, group.getId(),false);
+        Optional<CodeGroup> optionalCodeGroup = codeGroupRepository.findByCodeAndBotIdAndActive(text, group.getId(), false);
         if (optionalCodeGroup.isEmpty()) {
             adminUtils.setUserState(userId, StateEnum.START);
             sender.sendMessage(userId, langService.getMessage(LangFields.JOIN_REQ_CODE_INVALID_TEXT, userLang), responseButton.start(group.getId(), userLang));

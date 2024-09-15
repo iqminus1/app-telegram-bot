@@ -36,7 +36,7 @@ public class InvoiceController {
     @PostMapping
     @Async
     public void payment(@RequestBody Invoice invoice) {
-        Tariff tariff = tariffRepository.getById(invoice.getId());
+        Tariff tariff = tariffRepository.getById((long) invoice.getTariffId());
         if (!tariff.getPrice().equals(invoice.getAmount())) {
             return;
         }

@@ -171,7 +171,7 @@ public class ResponseButton {
         list.add(Map.of(clickText, AppConstant.CHANGE_CLICK_STATUS_DATA + botId));
 
         String paymeText = langService.getMessage(LangFields.STOP_PAYMENT_PAYME_TEXT, userLang);
-        if (!group.isClick()) {
+        if (!group.isPayme()) {
             paymeText = langService.getMessage(LangFields.START_PAYMENT_PAYME_TEXT, userLang);
         }
         list.add(Map.of(paymeText, AppConstant.CHANGE_PAYME_STATUS_DATA + botId));

@@ -229,21 +229,22 @@ public class CallbackServiceImpl implements CallbackService {
     }
 
     private void changeStatusPayme(CallbackQuery callbackQuery) {
-        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
-        Group group = groupRepository.getByIdDefault(botId);
-        if (group.isAllowPayment()) {
-            if (group.isCode() || group.isScreenShot() || group.isClick()) {
-                group.setPayme(!group.isPayme());
-                groupRepository.saveOptional(group);
-                showPaymentsInfo(callbackQuery);
-                return;
-            }
-            Long userId = callbackQuery.getFrom().getId();
-            sender.sendMessage(userId, langService.getMessage(LangFields.ONE_PAYMENT_WILL_BE_ACTIVE_TEXT, commonUtils.getUserLang(userId)));
-            return;
-        }
         Long userId = callbackQuery.getFrom().getId();
-        sender.sendMessage(userId, langService.getMessage(LangFields.NOT_ALLOWED_PAYMENT_TEXT, commonUtils.getUserLang(userId)));
+        sender.sendMessage(userId, langService.getMessage(LangFields.SECTION_DONT_WORK_TEXT, commonUtils.getUserLang(userId)));
+        return;
+//        long botId = Long.parseLong(callbackQuery.getData().split(":")[1]);
+//        Group group = groupRepository.getByIdDefault(botId);
+//        if (group.isAllowPayment()) {
+//            if (group.isCode() || group.isScreenShot() || group.isClick()) {
+//                group.setPayme(!group.isPayme());
+//                groupRepository.saveOptional(group);
+//                showPaymentsInfo(callbackQuery);
+//                return;
+//            }
+//            sender.sendMessage(userId, langService.getMessage(LangFields.ONE_PAYMENT_WILL_BE_ACTIVE_TEXT, commonUtils.getUserLang(userId)));
+//            return;
+//        }
+//        sender.sendMessage(userId, langService.getMessage(LangFields.NOT_ALLOWED_PAYMENT_TEXT, commonUtils.getUserLang(userId)));
 
     }
 

@@ -17,7 +17,7 @@ public class AdminResponseText {
     private final TariffRepository tariffRepository;
     private final ResponseText responseText;
 
-    public Map<String, String> getPaymentData(String lang, Long botId, Long userId) {
+    public Map<String, String> getPaymentData(String lang, Long botId) {
         List<Tariff> tariffs = tariffRepository.findAllByBotIdDefault(botId);
         if (tariffs.isEmpty()) {
             return null;
@@ -26,7 +26,7 @@ public class AdminResponseText {
         Map<String, String> map = new LinkedHashMap<>();
         for (Tariff tariff : tariffs) {
             String text = responseText.getTariffExpireText(tariff.getType().ordinal(), lang);
-            String data = "?tariffId=" + tariff.getId() + "&userId=" + userId;
+            String data = "&amount=" + tariff.getPrice() + "&additional_param4=" + tariff.getId();
             map.put(text, data);
         }
         return map;

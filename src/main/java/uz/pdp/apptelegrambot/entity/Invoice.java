@@ -3,9 +3,9 @@ package uz.pdp.apptelegrambot.entity;
 import jakarta.persistence.Entity;
 import lombok.*;
 import uz.pdp.apptelegrambot.entity.temp.AbsLongEntity;
-import uz.pdp.apptelegrambot.enums.ExpireType;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,13 +14,13 @@ import java.io.Serializable;
 @ToString
 @Entity
 public class Invoice extends AbsLongEntity implements Serializable {
-    private String number;
-
     private Long userId;
 
-    private Long groupId;
+    private Long botId;
 
     private Long amount;
 
-    private ExpireType type;
+    private Long tariffId;
+
+    private LocalDateTime at;
 }

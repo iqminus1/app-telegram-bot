@@ -6,8 +6,8 @@ import uz.pdp.apptelegrambot.enums.ExpireType;
 import java.time.LocalDateTime;
 
 public interface AppConstant {
-    String TOKEN = "7403157157:AAGoSNnB4NRx38Hy1n_urX_F0qMir8X8sOY";
-    String USERNAME = "obunamanager_bot";
+    String TOKEN = "7320858493:AAFtIOr8bofMTKFuMjegu8SVuxxrdTMYagI";
+    String USERNAME = "manager_groups_v1_bot";
     String TARIFF_SELECTING_DATA = "tariffSelectData:";
     String GREEN_TEXT = " \uD83D\uDFE2";
     String ACCEPT_TARIFFS_DATA = "acceptTariffs";
